@@ -164,7 +164,10 @@ function renderLists(monthBills) {
             </div>
             <div class="b-action">
                 <span class="b-price">${formatCurrency(b.value)}</span>
-                ${!b.paid ? `<button class="pay-btn" onclick="toggleBill(${b.id})">✓</button>` : '✅'}
+                ${!b.paid ? `
+                    <button class="edit-btn-mini" onclick="editBill(${b.id})" title="Editar" style="background:none; border:1px solid var(--accent); color:var(--accent); border-radius:4px; padding:2px 5px; font-size:10px; cursor:pointer; margin-right:5px;">✏️</button>
+                    <button class="pay-btn" onclick="toggleBill(${b.id})">✓</button>
+                ` : '✅'}
                 <button onclick="delBill(${b.id})" style="border:none; background:none; color:red; font-size:9px; margin-left:8px; opacity:0.1;">DELL</button>
             </div>
         `;
@@ -221,6 +224,24 @@ function renderCalendar(type) {
 }
 
 // --- APP ACTIONS ---
+function editBill(id) {
+    const b = state.bills.find(x => x.id === id);
+    if (!b) return;
+
+    const modalTitle = document.getElementById('modal-title');
+    const editingId = document.getElementById('editing-id');
+    if (modalTitle) modalTitle.innerText = "Editar Despesa";
+    if (editingId) editingId.value = b.id;
+
+    document.getElementById('in-title').value = b.title;
+    document.getElementById('in-value').value = b.value;
+    document.getElementById('in-date').value = b.date;
+    document.getElementById('in-member').value = b.member;
+    document.getElementById('in-bank').value = b.bank;
+
+    document.getElementById('modal-form').style.display = 'flex';
+}
+
 function toggleBill(id) {
     const i = state.bills.findIndex(b => b.id === id);
     if (i !== -1) { state.bills[i].paid = !state.bills[i].paid; saveStore(); }
@@ -274,7 +295,14 @@ document.getElementById('import-file').onchange = importData;
 document.getElementById('m-btn-open-cal').onclick = () => document.getElementById('modal-cal').style.display = 'flex';
 document.getElementById('m-btn-open-settings').onclick = () => document.getElementById('modal-settings').style.display = 'flex';
 if (document.getElementById('pc-open-settings')) document.getElementById('pc-open-settings').onclick = () => document.getElementById('modal-settings').style.display = 'flex';
-document.getElementById('fab-add').onclick = () => document.getElementById('modal-form').style.display = 'flex';
+
+// Reset form when opening New
+document.getElementById('fab-add').onclick = () => {
+    document.getElementById('modal-title').innerText = "Nova Despesa";
+    document.getElementById('editing-id').value = "";
+    document.getElementById('bill-form').reset();
+    document.getElementById('modal-form').style.display = 'flex';
+};
 
 document.querySelectorAll('.close-modal').forEach(b => b.onclick = () => {
     document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
@@ -289,15 +317,27 @@ document.getElementById('m-cal-next').onclick = () => switchMonth(1);
 // Bill Form
 document.getElementById('bill-form').onsubmit = (e) => {
     e.preventDefault();
-    state.bills.push({
-        id: Date.now(),
+    const id = document.getElementById('editing-id').value;
+
+    const billData = {
         title: document.getElementById('in-title').value,
         value: document.getElementById('in-value').value,
         date: document.getElementById('in-date').value,
         member: document.getElementById('in-member').value,
         bank: document.getElementById('in-bank').value,
-        paid: false
-    });
+    };
+
+    if (id) {
+        const i = state.bills.findIndex(x => x.id == id);
+        if (i !== -1) state.bills[i] = { ...state.bills[i], ...billData };
+    } else {
+        state.bills.push({
+            id: Date.now(),
+            ...billData,
+            paid: false
+        });
+    }
+
     e.target.reset();
     document.getElementById('modal-form').style.display = 'none';
     saveStore();
