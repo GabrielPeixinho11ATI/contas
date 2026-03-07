@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bills Pro V10 - Organizador Financeiro</title>
+    <title>Bills Pro V10 - Versão Senior Consolidada</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
@@ -38,20 +38,19 @@
             color: var(--text);
             overflow-x: hidden;
             transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh;
         }
 
-        /* === SCROLLBAR (PC) === */
-        ::-webkit-scrollbar {
-            width: 6px;
+        button,
+        .filter-item {
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            outline: none;
         }
 
-        ::-webkit-scrollbar-track {
-            background: var(--bg);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 10px;
+        button:active {
+            transform: scale(0.96);
         }
 
         /* === LAYOUT SHELL === */
@@ -73,8 +72,8 @@
             padding-bottom: 110px;
         }
 
-        /* === MOBILE HEADER === */
-        .mobile-header {
+        /* === HEADER (MOBILE & PC) === */
+        .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -82,170 +81,179 @@
             background: var(--bg);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
             border-bottom: 1px solid var(--border);
         }
 
         .brand h1 {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 800;
             color: var(--accent);
-            letter-spacing: -0.5px;
+            letter-spacing: -1px;
         }
 
         .header-tools {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .tool-btn {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            width: 42px;
-            height: 42px;
+            border-radius: 14px;
+            width: 44px;
+            height: 44px;
             color: var(--text);
-            cursor: pointer;
             display: grid;
             place-items: center;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
         }
 
-        /* === DASHBOARD HERO === */
-        .dash-hero {
+        .tool-btn:hover {
+            background: var(--border);
+            border-color: var(--accent);
+        }
+
+        /* === DASHBOARD === */
+        .dash-section {
             padding: 25px 20px;
         }
 
-        .total-display-card {
+        .hero-card {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: var(--radius-xl);
             padding: 40px 25px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-            margin-bottom: 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
             position: relative;
             overflow: hidden;
         }
 
-        .label-sm {
+        .label-xs {
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--text-dim);
             font-weight: 800;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
-        .val-lg {
-            font-size: 3rem;
+        .val-hero {
+            font-size: 3.2rem;
             font-weight: 900;
-            letter-spacing: -2px;
+            letter-spacing: -3px;
             line-height: 1;
+            margin-bottom: 15px;
         }
 
-        .val-paid {
-            color: var(--success);
-            font-weight: 800;
+        .val-paid-row {
             font-size: 0.9rem;
-            margin-top: 15px;
+            font-weight: 700;
+            color: var(--success);
+            opacity: 0.9;
         }
 
-        /* MEMBER GRID (MOBILE 2x2) */
-        .member-grid {
+        /* MEMBER GRID */
+        .folder-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 30px;
+            gap: 15px;
+            margin-bottom: 35px;
         }
 
-        .member-card {
+        .folder-card {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 18px;
+            padding: 20px;
             position: relative;
         }
 
-        .member-card::after {
+        .folder-card::after {
             content: '';
             position: absolute;
             bottom: 0;
-            left: 18px;
-            right: 18px;
+            left: 15px;
+            right: 15px;
             height: 3px;
             background: var(--accent);
-            border-radius: 10px 10px 0 0;
+            border-radius: 10px;
             opacity: 0.3;
         }
 
-        .member-name {
-            font-size: 0.7rem;
+        .folder-name {
+            font-size: 0.75rem;
             font-weight: 800;
             color: var(--text-dim);
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
-        .member-val {
-            font-size: 1.15rem;
-            font-weight: 850;
+        .folder-val {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--text);
         }
 
-        /* === BILL LIST === */
+        /* === LISTING === */
         .list-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
             font-weight: 800;
             color: var(--text-dim);
             text-transform: uppercase;
         }
 
         .bill-stack {
-            display: grid;
-            gap: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
 
         .bill-card {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 20px;
+            padding: 22px;
             transition: 0.25s;
         }
 
-        .b-top {
+        .b-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
-        .b-bank {
+        .bank-badge {
             font-size: 0.65rem;
             font-weight: 900;
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
             color: #FFF;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .b-price {
-            font-size: 1.2rem;
+        .b-val {
+            font-size: 1.35rem;
             font-weight: 900;
+            color: var(--text);
         }
 
         .b-title {
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             font-weight: 750;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             display: block;
         }
 
-        .b-bottom {
+        .b-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -253,80 +261,72 @@
             border-top: 1px solid var(--border);
         }
 
-        .b-meta {
-            font-size: 0.75rem;
+        .b-info {
+            font-size: 0.8rem;
             color: var(--text-dim);
             font-weight: 700;
         }
 
-        .b-actions {
+        .b-btns {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .action-circle {
-            width: 36px;
-            height: 36px;
+        .circle-btn {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            border: none;
-            cursor: pointer;
             display: grid;
             place-items: center;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
-        .btn-check {
+        .btn-pay {
             background: var(--success);
             color: #000;
             font-weight: 900;
         }
 
-        .btn-edit {
-            background: var(--border);
-            color: var(--text);
-        }
-
         .btn-del {
             background: transparent;
             color: var(--danger);
-            opacity: 0.4;
+            border: 1px solid var(--border);
+            opacity: 0.6;
         }
 
-        .faded {
+        .is-paid {
             opacity: 0.4;
             filter: grayscale(1);
         }
 
         /* === FAB MOBILE === */
-        #fab-add {
+        .fab-add {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            width: 65px;
-            height: 65px;
+            width: 68px;
+            height: 68px;
             background: var(--accent);
             color: #000;
             border-radius: 50%;
-            border: none;
             font-size: 2.2rem;
             font-weight: 800;
             box-shadow: 0 15px 40px rgba(187, 134, 252, 0.4);
-            z-index: 1000;
-            cursor: pointer;
+            z-index: 2000;
             display: grid;
             place-items: center;
         }
 
-        /* === DESKTOP 3-COLUMNS === */
+        /* === DESKTOP LAYOUT (3-COLUMNS) === */
         @media (min-width: 1024px) {
             .app-shell {
                 display: grid;
                 grid-template-columns: var(--sidebar-w) 1fr var(--calendar-w);
                 height: 100vh;
+                overflow: hidden;
             }
 
-            .mobile-header,
-            #fab-add {
+            .fab-add {
                 display: none;
             }
 
@@ -341,59 +341,65 @@
                 overflow-y: auto;
             }
 
-            /* LEFT SIDEBAR */
+            /* SIDEBAR L */
             .sidebar-l {
                 background: var(--card);
                 border-right: 1px solid var(--border);
                 padding: 40px 30px;
                 flex-direction: column;
+                overflow-y: auto;
             }
 
             .sidebar-l h1 {
-                font-size: 1.6rem;
+                font-size: 1.7rem;
                 font-weight: 900;
-                margin-bottom: 35px;
+                margin-bottom: 45px;
                 color: var(--accent);
             }
 
-            #pc-add-btn {
+            .pc-add-btn {
                 width: 100%;
-                padding: 18px;
+                padding: 20px;
                 background: var(--accent);
                 color: #000;
-                border: none;
-                border-radius: 16px;
-                font-weight: 900;
-                margin-bottom: 40px;
-                cursor: pointer;
+                border-radius: 18px;
+                font-weight: 950;
                 font-size: 1rem;
+                margin-bottom: 50px;
                 box-shadow: 0 10px 25px rgba(187, 134, 252, 0.2);
             }
 
-            .nav-sec h3 {
-                font-size: 0.75rem;
+            .pc-add-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 35px rgba(187, 134, 252, 0.3);
+            }
+
+            .nav-group {
+                margin-bottom: 40px;
+            }
+
+            .nav-group h3 {
+                font-size: 0.8rem;
                 color: var(--text-dim);
                 text-transform: uppercase;
-                margin-bottom: 15px;
+                margin-bottom: 20px;
                 letter-spacing: 1px;
             }
 
-            .side-filters {
+            .filter-stack {
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: 10px;
             }
 
             .filter-item {
-                padding: 14px;
-                border-radius: 12px;
+                padding: 16px;
+                border-radius: 14px;
                 background: transparent;
-                border: 1px solid transparent;
                 color: var(--text-dim);
                 text-align: left;
-                cursor: pointer;
                 font-weight: 700;
-                transition: 0.2s;
+                border: 1px solid transparent;
             }
 
             .filter-item.active {
@@ -402,36 +408,23 @@
                 color: var(--accent);
             }
 
-            .sidebar-footer {
-                margin-top: auto;
-                display: flex;
-                gap: 10px;
+            .filter-item:hover:not(.active) {
+                background: rgba(255, 255, 255, 0.03);
             }
 
-            .side-tool {
-                flex: 1;
-                padding: 14px;
-                border-radius: 12px;
-                background: var(--bg);
-                border: 1px solid var(--border);
-                color: var(--text);
-                cursor: pointer;
-                display: grid;
-                place-items: center;
-                font-size: 1.2rem;
-            }
-
-            .member-grid {
+            .folder-grid {
                 grid-template-columns: repeat(4, 1fr);
                 gap: 20px;
+                margin-bottom: 40px;
             }
 
             /* TABLE PC */
-            .pc-table-box {
+            .pc-table-card {
                 background: var(--card);
                 border: 1px solid var(--border);
                 border-radius: var(--radius-lg);
                 overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             }
 
             .pc-table {
@@ -441,28 +434,28 @@
 
             .pc-table th {
                 text-align: left;
-                padding: 18px 20px;
+                padding: 22px 20px;
                 background: rgba(255, 255, 255, 0.02);
-                font-size: 0.7rem;
+                font-size: 0.75rem;
                 color: var(--text-dim);
                 text-transform: uppercase;
                 border-bottom: 1px solid var(--border);
             }
 
             .pc-table td {
-                padding: 20px;
+                padding: 22px 20px;
                 border-bottom: 1px solid var(--border);
                 font-weight: 600;
-                font-size: 0.95rem;
+                font-size: 1rem;
             }
 
-            .price-td {
-                font-weight: 800;
+            .accent-val {
+                font-weight: 900;
                 color: var(--accent);
                 font-size: 1.1rem;
             }
 
-            /* RIGHT SIDEBAR (CALENDAR) */
+            /* SIDEBAR R */
             .sidebar-r {
                 background: var(--card);
                 border-left: 1px solid var(--border);
@@ -471,139 +464,148 @@
             }
         }
 
-        /* === MODALS === */
-        .modal-overlay {
+        /* MODALS */
+        .modal-wrap {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 5000;
+            z-index: 9999;
             padding: 20px;
         }
 
-        .modal-card {
+        .modal-box {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: var(--radius-xl);
             width: 100%;
-            max-width: 450px;
-            padding: 35px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            max-width: 480px;
+            padding: 40px;
+            box-shadow: 0 40px 90px rgba(0, 0, 0, 0.8);
         }
 
-        .m-header {
+        .modal-h {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .modal-h h2 {
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-close {
+            background: none;
+            color: var(--text-dim);
+            font-size: 2rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .field {
+            margin-bottom: 25px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 850;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 18px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .field input:focus {
+            border-color: var(--accent);
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .cancel-btn {
+            flex: 1;
+            padding: 18px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            border-radius: 18px;
+            font-weight: 800;
+        }
+
+        .save-btn {
+            flex: 2;
+            padding: 18px;
+            background: var(--accent);
+            color: #000;
+            border-radius: 18px;
+            font-weight: 950;
+            font-size: 1rem;
+        }
+
+        /* CALENDAR SYSTEM */
+        .cal-head {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
         }
 
-        .m-header h2 {
-            font-weight: 800;
-            font-size: 1.3rem;
-        }
-
-        .close-m {
-            background: none;
-            border: none;
-            color: var(--text-dim);
-            font-size: 1.8rem;
-            cursor: pointer;
-        }
-
-        .f-group {
-            margin-bottom: 22px;
-        }
-
-        .f-group label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 800;
-            color: var(--text-dim);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .f-group input,
-        .f-group select {
-            width: 100%;
-            padding: 16px;
+        .cal-nav {
+            width: 42px;
+            height: 42px;
             background: var(--bg);
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: 12px;
             color: var(--text);
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .btn-cancel {
-            flex: 1;
-            padding: 18px;
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            border-radius: 16px;
-            font-weight: 800;
-            cursor: pointer;
-        }
-
-        .btn-confirm {
-            flex: 2;
-            padding: 18px;
-            background: var(--accent);
-            color: #000;
-            border: none;
-            border-radius: 16px;
-            font-weight: 900;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        /* CALENDAR */
-        .cal-ctrl {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .cal-arrow {
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--text);
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            cursor: pointer;
+            font-size: 1.4rem;
+            display: grid;
+            place-items: center;
         }
 
         .cal-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
+            gap: 8px;
         }
 
-        .cal-h {
-            font-size: 0.65rem;
+        .cal-w {
+            font-size: 0.7rem;
             font-weight: 900;
             color: var(--text-dim);
             text-align: center;
-            padding-bottom: 10px;
+            padding-bottom: 12px;
         }
 
-        .cal-d {
+        .cal-day {
             aspect-ratio: 1;
             display: flex;
             flex-direction: column;
@@ -611,38 +613,39 @@
             justify-content: center;
             font-size: 0.95rem;
             font-weight: 800;
-            border-radius: 12px;
-            cursor: pointer;
+            border-radius: 14px;
             position: relative;
         }
 
-        .cal-d.today {
-            border: 1px solid var(--accent);
+        .cal-day.is-today {
+            border: 2px solid var(--accent);
             color: var(--accent);
         }
 
         .cal-dots {
             display: flex;
-            gap: 2px;
+            gap: 3px;
             position: absolute;
-            bottom: 5px;
+            bottom: 8px;
         }
 
-        .dot {
-            width: 4px;
-            height: 4px;
+        .cal-dot {
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
             background: var(--accent);
+            box-shadow: 0 0 5px var(--accent);
         }
 
-        .animate {
-            animation: fadeIn 0.3s ease-out forwards;
+        /* ANIMATIONS */
+        .fade-in {
+            animation: animFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes fadeIn {
+        @keyframes animFade {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(15px);
             }
 
             to {
@@ -655,136 +658,130 @@
 
 <body>
     <div class="app-shell">
-        <!-- PC SIDEBAR -->
+        <!-- SIDEBAR L (PC) -->
         <aside class="desktop-only sidebar-l">
-            <h1 id="brand-l">Bills Pro V10</h1>
-            <button id="pc-add-btn">+ Adicionar Conta</button>
-            <nav class="nav-sec">
-                <h3>Filtrar Pasta</h3>
-                <div id="pc-filters" class="side-filters"></div>
+            <h1>Bills Pro V10</h1>
+            <button class="pc-add-btn" id="trigger-add-pc">+ Adicionar Conta</button>
+            <nav class="nav-group">
+                <h3>Pastas Familiares</h3>
+                <div id="filter-container" class="filter-stack"></div>
             </nav>
-            <div class="sidebar-footer">
-                <button class="side-tool" onclick="openSettings()">⚙️</button>
-                <button class="side-tool" onclick="exportData()">📥</button>
-                <button class="side-tool" onclick="triggerImport()">📤</button>
-            </div>
         </aside>
 
+        <!-- MAIN AREA -->
         <main class="main-content">
-            <header class="mobile-header">
+            <header class="app-header">
                 <div class="brand">
-                    <h1 id="brand-m">Bills Pro V10</h1>
+                    <h1>Bills Pro <span style="font-weight:400; font-size:0.8rem; opacity:0.6;">V10</span></h1>
                 </div>
                 <div class="header-tools">
-                    <button class="tool-btn" onclick="exportData()">📥</button>
-                    <button class="tool-btn" onclick="openSettings()">⚙️</button>
-                    <button class="tool-btn" onclick="openMobileCal()">📅</button>
+                    <button class="tool-btn" onclick="exportData()" title="Exportar Backup">📥</button>
+                    <button class="tool-btn" onclick="triggerImport()" title="Importar Backup">📤</button>
+                    <button class="tool-btn" onclick="openMobileCal()" class="mobile-only"
+                        title="Calendário">📅</button>
                 </div>
             </header>
 
-            <section class="dash-hero">
-                <div class="total-display-card">
-                    <p class="label-sm">Total Geral Pendente</p>
-                    <h1 id="total-geral" class="val-lg">R$ 0,00</h1>
-                    <p class="val-paid">Pago este mês: <span id="total-pago">R$ 0,00</span></p>
+            <section class="dash-section">
+                <!-- Sumário Principal -->
+                <div class="hero-card">
+                    <p class="label-xs">Total Geral Pendente</p>
+                    <h1 id="total-geral" class="val-hero">R$ 0,00</h1>
+                    <p class="val-paid-row">Total Pago este mês: <span id="total-pago">R$ 0,00</span></p>
                 </div>
 
-                <div id="folder-grid" class="member-grid"></div>
+                <!-- Cards por Membro -->
+                <div id="member-grid" class="folder-grid"></div>
 
+                <!-- Título do Mês Mobile/PC -->
                 <div class="list-header">
-                    <span>Fluxo de Contas</span>
-                    <span id="month-label-m" class="mobile-only" style="color:var(--accent)"></span>
+                    <span id="month-label" style="color:var(--accent); font-size:1rem;"></span>
+                    <div class="desktop-only" style="display:flex; gap:10px;">
+                        <button class="cal-nav" onclick="moveMonth(-1)"
+                            style="width:30px; height:30px; font-size:1rem;">‹</button>
+                        <button class="cal-nav" onclick="moveMonth(1)"
+                            style="width:30px; height:30px; font-size:1rem;">›</button>
+                    </div>
                 </div>
 
-                <div id="bill-render-area"></div>
+                <!-- Listagem Real -->
+                <div id="bill-container"></div>
 
-                <details style="margin-top:30px; cursor:pointer;" open>
+                <!-- Histórico de Pagas -->
+                <details style="margin-top:40px; cursor:pointer;" open>
                     <summary
-                        style="text-align:center; color:var(--text-dim); font-weight:800; font-size:0.8rem; padding:15px; border-top:1px solid var(--border);">
-                        Histórico de Pagas (<span id="paid-count">0</span>)
+                        style="text-align:center; color:var(--text-dim); font-weight:850; font-size:0.85rem; padding:20px; border-top:1px solid var(--border); list-style:none;">
+                        HISTÓRICO DE PAGAS (<span id="count-paid">0</span>) ▾
                     </summary>
-                    <div id="bill-history" class="bill-stack faded" style="margin-top:20px;"></div>
+                    <div id="history-container" class="bill-stack is-paid" style="margin:20px 0;"></div>
                 </details>
             </section>
         </main>
 
+        <!-- SIDEBAR R (PC) -->
         <aside class="desktop-only sidebar-r">
-            <div class="cal-ctrl">
-                <button class="cal-arrow" onclick="moveMonth(-1)">‹</button>
-                <h3 id="cal-title-pc" class="cal-title"></h3>
-                <button class="cal-arrow" onclick="moveMonth(1)">›</button>
+            <div class="cal-head">
+                <button class="cal-nav" onclick="moveMonth(-1)">‹</button>
+                <h3 id="cal-title-pc"></h3>
+                <button class="cal-nav" onclick="moveMonth(1)">›</button>
             </div>
             <div id="cal-grid-pc" class="cal-grid"></div>
         </aside>
 
-        <button id="fab-add">+</button>
+        <!-- FAB MOBILE -->
+        <button class="fab-add" id="trigger-add-mobile">+</button>
     </div>
 
-    <!-- MODAL ADD/EDIT -->
-    <div id="modal-bill" class="modal-overlay">
-        <div class="modal-card">
-            <div class="m-header">
-                <h2 id="modal-title">Novo Lançamento</h2>
-                <button class="close-m" onclick="closeModals()">×</button>
+    <!-- MODAL: ADD BILL -->
+    <div id="modal-bill" class="modal-wrap">
+        <div class="modal-box">
+            <div class="modal-h">
+                <h2>Nova Despesa</h2>
+                <button class="btn-close" onclick="closeModals()">×</button>
             </div>
             <form id="bill-form">
-                <input type="hidden" id="edit-id">
-                <div class="f-group">
-                    <label>Título da Conta</label>
-                    <input type="text" id="in-title" required placeholder="Ex: Aluguel, Luz">
+                <div class="field"><label>Nome da Conta</label><input type="text" id="in-title" required
+                        placeholder="Ex: Aluguel, Nubank"></div>
+                <div class="form-row">
+                    <div class="field"><label>Valor (R$)</label><input type="number" id="in-value" step="0.01" required>
+                    </div>
+                    <div class="field"><label>Vencimento</label><input type="date" id="in-date" required></div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                    <div class="f-group"><label>Valor (R$)</label><input type="number" id="in-value" step="0.01"
-                            required></div>
-                    <div class="f-group"><label>Vencimento</label><input type="date" id="in-date" required></div>
+                <div class="form-row">
+                    <div class="field"><label>Membro (Pasta)</label><select id="in-member" required></select></div>
+                    <div class="field"><label>Banco / Origem</label><select id="in-bank" required></select></div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                    <div class="f-group"><label>Pasta</label><select id="in-member" required></select></div>
-                    <div class="f-group"><label>Banco</label><select id="in-bank" required></select></div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModals()">Cancelar</button>
-                    <button type="submit" class="btn-confirm">Salvar Despesa</button>
+                <div class="modal-btns">
+                    <button type="button" class="cancel-btn" onclick="closeModals()">Cancelar</button>
+                    <button type="submit" class="save-btn">Salvar Conta</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- OTHER MODALS -->
-    <div id="modal-cal" class="modal-overlay">
-        <div class="modal-card">
-            <div class="m-header">
-                <div style="display:flex; align-items:center; gap:20px;">
-                    <button class="cal-arrow" onclick="moveMonth(-1)">‹</button>
-                    <h3 id="cal-title-m"></h3>
-                    <button class="cal-arrow" onclick="moveMonth(1)">›</button>
+    <!-- MODAL: CALENDÁRIO MOBILE -->
+    <div id="modal-cal" class="modal-wrap">
+        <div class="modal-box">
+            <div class="modal-h">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <button class="cal-nav" onclick="moveMonth(-1)">‹</button>
+                    <h3 id="cal-title-mobile"></h3>
+                    <button class="cal-nav" onclick="moveMonth(1)">›</button>
                 </div>
-                <button class="close-m" onclick="closeModals()">×</button>
+                <button class="btn-close" onclick="closeModals()">×</button>
             </div>
-            <div id="cal-grid-m" class="cal-grid"></div>
+            <div id="cal-grid-mobile" class="cal-grid"></div>
         </div>
     </div>
 
-    <div id="modal-settings" class="modal-overlay">
-        <div class="modal-card">
-            <div class="m-header">
-                <h2>Ajustes</h2><button class="close-m" onclick="closeModals()">×</button>
-            </div>
-            <div class="f-group"><label>Nome do App</label><input type="text" id="set-app-name"
-                    oninput="saveAppName(this.value)"></div>
-        </div>
-    </div>
-
-    <input type="file" id="import-trigger" style="display:none;" onchange="importJSON(event)">
+    <!-- HIDDEN INPUTS -->
+    <input type="file" id="import-input" style="display:none" onchange="processImport(event)">
 
     <script>
-        /** 
-         * BILLS PRO V10 ENGINE
-         * 100% Client-Side LocalStorage Logic
+        /**
+         * LOGIC ENGINE - SENIOR RE-ARCHITECTED
          */
-
-        const DEFAULTS = {
-            appName: "Bills Pro V10",
+        const CONFIG = {
             members: ["Gabriel", "Gabi", "Papai", "Mãe"],
             banks: [
                 { name: "Santander", color: "#ec1c24" },
@@ -795,174 +792,268 @@
                 { name: "Cartão Mais", color: "#003366" },
                 { name: "Mercado Pago", color: "#009ee3" }
             ],
-            bills: []
+            storageKey: 'billspro_v10_senior_fix'
         };
 
-        const STORAGE_KEY = 'billspro_v10_final';
-        let state = { ...DEFAULTS, viewDate: new Date(), filterMember: "Tudo" };
+        let db = {
+            bills: [],
+            viewDate: new Date(),
+            filter: "Tudo"
+        };
 
-        function load() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                const data = JSON.parse(saved);
-                state = { ...state, ...data, viewDate: new Date() };
+        // --- HELPER WRAPPERS (FAIL-SAFE) ---
+        const ui = (id) => document.getElementById(id);
+
+        function formatBRL(v) {
+            return (parseFloat(v) || 0).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+        }
+
+        // --- CORE MATH & RENDERING ---
+        function atualizarDashboard() {
+            const m = db.viewDate.getMonth();
+            const y = db.viewDate.getFullYear();
+            const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const dateStr = `${months[m]} ${y}`;
+
+            // Sync Header Titles
+            if (ui('cal-title-pc')) ui('cal-title-pc').innerText = dateStr;
+            if (ui('cal-title-mobile')) ui('cal-title-mobile').innerText = dateStr;
+            if (ui('month-label')) ui('month-label').innerText = dateStr;
+
+            // Filter data
+            const currentMonthBills = db.bills.filter(b => {
+                const [by, bm] = b.date.split('-').map(Number);
+                return (bm - 1) === m && by === y;
+            });
+
+            const unpaidBills = currentMonthBills.filter(b => !b.paid);
+            const paidBills = currentMonthBills.filter(b => b.paid);
+
+            const totalUnpaid = unpaidBills.reduce((acc, b) => acc + (parseFloat(b.value) || 0), 0);
+            const totalPaid = paidBills.reduce((acc, b) => acc + (parseFloat(b.value) || 0), 0);
+
+            if (ui('total-geral')) ui('total-geral').innerText = formatBRL(totalUnpaid);
+            if (ui('total-pago')) ui('total-pago').innerText = formatBRL(totalPaid);
+
+            // Member Grid
+            const grid = ui('member-grid');
+            if (grid) {
+                grid.innerHTML = '';
+                CONFIG.members.forEach(mem => {
+                    const memVal = unpaidBills.filter(b => b.member === mem).reduce((a, b) => a + (parseFloat(b.value) || 0), 0);
+                    grid.innerHTML += `
+                        <div class="folder-card fade-in">
+                            <p class="folder-name">${mem}</p>
+                            <p class="folder-val">${formatBRL(memVal)}</p>
+                        </div>
+                    `;
+                });
             }
-            refreshUI();
-        }
 
-        function save() {
-            const { viewDate, filterMember, ...toSave } = state;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-            refreshUI();
-        }
+            // Sidebar Filters
+            const filterBox = ui('filter-container');
+            if (filterBox) {
+                filterBox.innerHTML = '';
+                ["Tudo", ...CONFIG.members].forEach(f => {
+                    const btn = document.createElement('button');
+                    btn.className = `filter-item ${db.filter === f ? 'active' : ''}`;
+                    btn.innerText = f;
+                    btn.onclick = () => { db.filter = f; atualizarDashboard(); };
+                    filterBox.appendChild(btn);
+                });
+            }
 
-        function refreshUI() {
-            const m = state.viewDate.getMonth();
-            const y = state.viewDate.getFullYear();
-            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            const dateFull = `${monthNames[m]} ${y}`;
-
-            document.getElementById('brand-l').innerText = state.appName;
-            document.getElementById('brand-m').innerText = state.appName;
-            document.getElementById('cal-title-pc').innerText = dateFull;
-            document.getElementById('cal-title-m').innerText = dateFull;
-            document.getElementById('month-label-m').innerText = dateFull;
-
-            const bills = state.bills.filter(b => {
-                const d = new Date(b.date);
-                return d.getUTCMonth() === m && d.getUTCFullYear() === y;
-            });
-
-            const unpaid = bills.filter(b => !b.paid);
-            const paid = bills.filter(b => b.paid);
-
-            document.getElementById('total-geral').innerText = formatBRL(unpaid.reduce((a, b) => a + parseFloat(b.value), 0));
-            document.getElementById('total-pago').innerText = formatBRL(paid.reduce((a, b) => a + parseFloat(b.value), 0));
-
-            const fGrid = document.getElementById('folder-grid');
-            fGrid.innerHTML = '';
-            state.members.forEach(mem => {
-                const val = unpaid.filter(b => b.member === mem).reduce((a, b) => a + parseFloat(b.value), 0);
-                fGrid.innerHTML += `<div class="member-card animate"><p class="member-name">${mem}</p><p class="member-val">${formatBRL(val)}</p></div>`;
-            });
-
-            const filterBox = document.getElementById('pc-filters');
-            filterBox.innerHTML = '';
-            ["Tudo", ...state.members].forEach(f => {
-                const btn = document.createElement('button');
-                btn.className = `filter-item ${state.filterMember === f ? 'active' : ''}`;
-                btn.innerText = f;
-                btn.onclick = () => { state.filterMember = f; refreshUI(); };
-                filterBox.appendChild(btn);
-            });
-
-            renderBills(bills);
-            renderCalendar('pc');
-            renderCalendar('m');
+            renderBills(currentMonthBills);
+            renderCalendar('pc', m, y);
+            renderCalendar('mobile', m, y);
         }
 
         function renderBills(all) {
-            const container = document.getElementById('bill-render-area');
-            const history = document.getElementById('bill-history');
-            container.innerHTML = ''; history.innerHTML = '';
+            const list = ui('bill-container');
+            const history = ui('history-container');
+            if (!list || !history) return;
 
-            const filtered = all.filter(b => state.filterMember === "Tudo" || b.member === state.filterMember);
-            const unpaid = filtered.filter(b => !b.paid);
-            const paid = filtered.filter(b => b.paid);
-            document.getElementById('paid-count').innerText = paid.length;
+            list.innerHTML = ''; history.innerHTML = '';
+
+            const filtered = all.filter(b => db.filter === "Tudo" || b.member === db.filter);
+            const pendentes = filtered.filter(b => !b.paid);
+            const pagas = filtered.filter(b => b.paid);
+
+            if (ui('count-paid')) ui('count-paid').innerText = pagas.length;
 
             if (window.innerWidth >= 1024) {
-                const table = document.createElement('table');
-                table.className = 'pc-table';
-                table.innerHTML = `<thead><tr><th>Status</th><th>Descrição</th><th>Membro</th><th>Banco</th><th>Valor</th><th>Ações</th></tr></thead><tbody id="bt"></tbody>`;
-                container.appendChild(table);
-                [...unpaid, ...paid].forEach(b => {
-                    const row = document.createElement('tr');
-                    if (b.paid) row.style.opacity = '0.4';
-                    row.innerHTML = `<td>${b.paid ? '✅' : '⏳'}</td><td style="font-weight:800">${b.title}</td><td>${b.member}</td><td>${b.bank}</td><td class="price-td">${formatBRL(b.value)}</td><td>
-                        <div class="b-actions">${!b.paid ? `<button class="action-circle btn-check" onclick="pay(${b.id})">✓</button>` : ''}<button class="action-circle btn-del" onclick="del(${b.id})">×</button></div>
-                    </td>`;
-                    document.getElementById('bt').appendChild(row);
+                const tableWrap = document.createElement('div');
+                tableWrap.className = 'pc-table-card fade-in';
+                tableWrap.innerHTML = `
+                    <table class="pc-table">
+                        <thead><tr><th>Status</th><th>Descrição</th><th>Membro</th><th>Banco</th><th>Valor</th><th>Ações</th></tr></thead>
+                        <tbody id="tbody-pc"></tbody>
+                    </table>
+                `;
+                list.appendChild(tableWrap);
+                const tbody = ui('tbody-pc');
+                [...pendentes, ...pagas].forEach(b => {
+                    const tr = document.createElement('tr');
+                    if (b.paid) tr.className = 'is-paid';
+                    tr.innerHTML = `
+                        <td>${b.paid ? '✅' : '⏳'}</td>
+                        <td style="font-weight:800">${b.title}</td>
+                        <td>${b.member}</td>
+                        <td style="color:${getBankColor(b.bank)}; font-weight:800">${b.bank}</td>
+                        <td class="accent-val">${formatBRL(b.value)}</td>
+                        <td><div class="b-btns">
+                            ${!b.paid ? `<button class="circle-btn btn-pay" onclick="markAsPaid(${b.id})">✓</button>` : ''}
+                            <button class="circle-btn btn-del" onclick="deleteBill(${b.id})">×</button>
+                        </div></td>
+                    `;
+                    tbody.appendChild(tr);
                 });
             } else {
-                unpaid.forEach(b => container.appendChild(card(b)));
-                paid.forEach(b => history.appendChild(card(b)));
+                pendentes.forEach(b => list.appendChild(createMobileCard(b)));
+                pagas.forEach(b => history.appendChild(createMobileCard(b)));
             }
         }
 
-        function card(b) {
-            const clr = state.banks.find(bk => bk.name === b.bank)?.color || '#666';
+        function createMobileCard(b) {
+            const clr = getBankColor(b.bank);
             const div = document.createElement('div');
-            div.className = `bill-card animate ${b.paid ? 'faded' : ''}`;
+            div.className = `bill-card fade-in ${b.paid ? 'is-paid' : ''}`;
+            const [, , bd] = b.date.split('-').map(Number);
             div.innerHTML = `
-                <div class="b-top"><span class="b-bank" style="background:${clr}">${b.bank}</span><span class="b-price">${formatBRL(b.value)}</span></div>
+                <div class="b-header"><span class="bank-badge" style="background:${clr}">${b.bank}</span><span class="b-val">${formatBRL(b.value)}</span></div>
                 <span class="b-title">${b.title}</span>
-                <div class="b-bottom"><span class="b-meta">${b.member} • Dia ${new Date(b.date).getUTCDate()}</span>
-                    <div class="b-actions">${!b.paid ? `<button class="action-circle btn-check" onclick="pay(${b.id})">✓</button>` : ''}
-                    <button class="action-circle btn-del" onclick="del(${b.id})">×</button></div>
-                </div>`;
+                <div class="b-footer">
+                    <span class="b-info">${b.member} • Dia ${bd}</span>
+                    <div class="b-btns">
+                        ${!b.paid ? `<button class="circle-btn btn-pay" onclick="markAsPaid(${b.id})">✓</button>` : ''}
+                        <button class="circle-btn btn-del" onclick="deleteBill(${b.id})">×</button>
+                    </div>
+                </div>
+            `;
             return div;
         }
 
-        function renderCalendar(type) {
-            const grid = document.getElementById(type === 'pc' ? 'cal-grid-pc' : 'cal-grid-m');
+        function renderCalendar(type, m, y) {
+            const grid = ui(type === 'pc' ? 'cal-grid-pc' : 'cal-grid-mobile');
+            if (!grid) return;
             grid.innerHTML = '';
-            ["D", "S", "T", "Q", "Q", "S", "S"].forEach(h => grid.innerHTML += `<div class="cal-h">${h}</div>`);
-            const y = state.viewDate.getFullYear(), m = state.viewDate.getMonth();
-            const first = new Date(y, m, 1).getDay(), last = new Date(y, m + 1, 0).getDate();
+            ["D", "S", "T", "Q", "Q", "S", "S"].forEach(h => grid.innerHTML += `<div class="cal-w">${h}</div>`);
+
+            const first = new Date(y, m, 1).getDay();
+            const last = new Date(y, m + 1, 0).getDate();
+            const today = new Date();
+
             for (let i = 0; i < first; i++) grid.innerHTML += '<div></div>';
             for (let d = 1; d <= last; d++) {
                 const day = document.createElement('div');
-                day.className = 'cal-d';
+                day.className = 'cal-day';
                 day.innerText = d;
-                const pending = state.bills.some(b => !b.paid && new Date(b.date).getUTCDate() === d && new Date(b.date).getUTCMonth() === m);
-                if (pending) day.innerHTML += `<div class="cal-dots"><div class="dot"></div></div>`;
-                if (d === new Date().getDate() && m === new Date().getMonth()) day.classList.add('today');
+                const pending = db.bills.some(b => {
+                    const [by, bm, bd] = b.date.split('-').map(Number);
+                    return !b.paid && bd === d && (bm - 1) === m && by === y;
+                });
+                if (pending) day.innerHTML += `<div class="cal-dots"><div class="cal-dot"></div></div>`;
+                if (d === today.getDate() && m === today.getMonth() && y === today.getFullYear()) day.classList.add('is-today');
                 grid.appendChild(day);
             }
         }
 
-        // --- FIXED ACTIONS ---
-        function openBillForm() {
-            document.getElementById('bill-form').reset();
-            document.getElementById('edit-id').value = "";
-            document.getElementById('in-member').innerHTML = state.members.map(m => `<option value="${m}">${m}</option>`).join('');
-            document.getElementById('in-bank').innerHTML = state.banks.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
-            document.getElementById('modal-bill').style.display = 'flex';
+        // --- HANDLERS & PERSISTENCE ---
+        function save() {
+            localStorage.setItem(CONFIG.storageKey, JSON.stringify({ bills: db.bills }));
+            atualizarDashboard();
         }
 
-        // --- EVENT LISTENERS (AS REQUESTED) ---
-        document.getElementById('pc-add-btn').addEventListener('click', openBillForm);
-        document.getElementById('fab-add').addEventListener('click', openBillForm);
+        function load() {
+            const saved = localStorage.getItem(CONFIG.storageKey);
+            if (saved) db.bills = JSON.parse(saved).bills || [];
+            atualizarDashboard();
+        }
 
-        document.getElementById('bill-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newBill = {
-                id: Date.now(),
-                title: document.getElementById('in-title').value,
-                value: document.getElementById('in-value').value,
-                date: document.getElementById('in-date').value,
-                member: document.getElementById('in-member').value,
-                bank: document.getElementById('in-bank').value,
-                paid: false
+        function markAsPaid(id) {
+            const b = db.bills.find(x => x.id === id);
+            if (b) { b.paid = true; save(); }
+        }
+
+        function deleteBill(id) {
+            if (confirm('Deseja excluir esta conta?')) {
+                db.bills = db.bills.filter(x => x.id !== id);
+                save();
+            }
+        }
+
+        function moveMonth(v) {
+            db.viewDate.setMonth(db.viewDate.getMonth() + v);
+            atualizarDashboard();
+        }
+
+        // --- UI TRIGGERS ---
+        function openBillForm() {
+            const f = ui('bill-form');
+            if (f) f.reset();
+            const memSel = ui('in-member');
+            const bnkSel = ui('in-bank');
+            if (memSel) memSel.innerHTML = CONFIG.members.map(m => `<option value="${m}">${m}</option>`).join('');
+            if (bnkSel) bnkSel.innerHTML = CONFIG.banks.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+            ui('modal-bill').style.display = 'flex';
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal-wrap').forEach(m => m.style.display = 'none');
+        }
+
+        function openMobileCal() { ui('modal-cal').style.display = 'flex'; }
+
+        // FORM SUBMIT
+        if (ui('bill-form')) {
+            ui('bill-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const val = ui('in-value').value;
+                db.bills.push({
+                    id: Date.now(),
+                    title: ui('in-title').value,
+                    value: parseFloat(val).toFixed(2),
+                    date: ui('in-date').value,
+                    member: ui('in-member').value,
+                    bank: ui('in-bank').value,
+                    paid: false
+                });
+                closeModals();
+                save();
+            });
+        }
+
+        // LISTENERS
+        if (ui('trigger-add-pc')) ui('trigger-add-pc').onclick = openBillForm;
+        if (ui('trigger-add-mobile')) ui('trigger-add-mobile').onclick = openBillForm;
+
+        // BACKUP
+        function exportData() {
+            const blob = new Blob([JSON.stringify(db.bills, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `backup_contas_pro.json`; a.click();
+        }
+        function triggerImport() { ui('import-input').click(); }
+        function processImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const imported = JSON.parse(ev.target.result);
+                    db.bills = Array.isArray(imported) ? imported : (imported.bills || []);
+                    save();
+                    alert('Backup Restaurado!');
+                } catch (err) { alert('Erro ao importar arquivo.'); }
             };
-            state.bills.push(newBill);
-            closeModals();
-            save();
-        });
+            reader.readAsText(file);
+        }
 
-        function pay(id) { const b = state.bills.find(x => x.id === id); b.paid = true; save(); }
-        function del(id) { if (confirm('Excluir?')) { state.bills = state.bills.filter(x => x.id !== id); save(); } }
-        function moveMonth(v) { state.viewDate.setMonth(state.viewDate.getMonth() + v); refreshUI(); }
-        function formatBRL(v) { return parseFloat(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
-        function openMobileCal() { document.getElementById('modal-cal').style.display = 'flex'; }
-        function openSettings() { document.getElementById('modal-settings').style.display = 'flex'; }
+        window.onclick = (e) => { if (e.target.classList.contains('modal-wrap')) closeModals(); };
+        window.onresize = atualizarDashboard;
 
-        window.onclick = (e) => { if (e.target.classList.contains('modal-overlay')) closeModals(); };
-        window.onresize = refreshUI;
-
-        load();
+        // BOOT
+        document.addEventListener('DOMContentLoaded', load);
     </script>
 </body>
 
