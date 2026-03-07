@@ -1,332 +1,322 @@
 /**
- * FINANÇAS FAMILIAR PRO V7 - ENGINE DEFINITIVO
- * 100% LocalStorage | Zero Backend | Vercel Ready
+ * BILLS PRO V8 - PREMIUM SPA ENGINE
+ * 100% Client-Side | LocalStorage | Zero Backend
  */
 
-// --- ESTADO GLOBAL ---
-let state = {
-    theme: 'light',
-    membros: ["Gabriel", "Família"],
-    bancos: [
-        { nome: "Nubank", cor: "#8a05be" },
-        { nome: "Itaú", cor: "#ec7000" },
-        { nome: "Dinheiro", cor: "#10B981" }
+// --- STATE MANAGEMENT ---
+let appState = {
+    theme: 'dark',
+    members: ["Gabriel", "Casa", "Família"],
+    banks: [
+        { name: "Nubank", color: "#8a05be" },
+        { name: "Itaú", color: "#ec7000" },
+        { name: "Cash", color: "#4CAF50" }
     ],
-    contas: [],
-    viewData: new Date(), // Data de navegação (mês/ano)
-    filtros: {
-        membro: 'Tudo',
-        dia: null
+    bills: [],
+    settings: {
+        activeFilter: 'Tudo',
+        activeDate: null, // Specific day filter
+        viewPivot: new Date() // Month/Year focus
     }
 };
 
-// --- PERSISTÊNCIA (LocalStorage) ---
-function carregarLocal() {
-    const salvo = localStorage.getItem('financas_pro_v7');
-    if (salvo) {
-        const parsed = JSON.parse(salvo);
-        state = { ...state, ...parsed };
-        state.viewData = new Date(state.viewData); // Restaurar objeto Date
+// --- DATA ACCESS LAYER ---
+function loadStore() {
+    const raw = localStorage.getItem('bills_pro_v8_final');
+    if (raw) {
+        const parsed = JSON.parse(raw);
+        appState = { ...appState, ...parsed };
+        appState.settings.viewPivot = new Date(appState.settings.viewPivot);
     }
-    aplicarTema();
-    renderizar();
+    applyTheme();
+    syncUI();
 }
 
-function salvarLocal() {
-    localStorage.setItem('financas_pro_v7', JSON.stringify(state));
-    renderizar();
+function saveStore() {
+    localStorage.setItem('bills_pro_v8_final', JSON.stringify(appState));
+    syncUI();
 }
 
-function aplicarTema() {
-    document.documentElement.setAttribute('data-theme', state.theme);
+function applyTheme() {
+    document.documentElement.setAttribute('data-theme', appState.theme);
+    const sun = document.getElementById('sun');
+    const moon = document.getElementById('moon');
+    if (appState.theme === 'dark') {
+        sun.style.display = 'block'; moon.style.display = 'none';
+    } else {
+        sun.style.display = 'none'; moon.style.display = 'block';
+    }
 }
 
-// --- SISTEMA DE BACKUP ---
-function exportarBackup() {
-    const dataStr = JSON.stringify(state, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
+// --- BACKUP ENGINE ---
+function doExport() {
+    const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `backup_financas_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup_bills_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
     URL.revokeObjectURL(url);
 }
 
-function importarBackup(e) {
+function doImport(e) {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (event) => {
         try {
             const data = JSON.parse(event.target.result);
-            if (data.contas && data.membros) {
-                state = { ...state, ...data };
-                state.viewData = new Date(); // Resetar para hoje para ver os dados
-                salvarLocal();
-                alert('Backup restaurado com sucesso! 🚀');
-            } else {
-                throw new Error();
-            }
-        } catch (err) {
-            alert('Erro ao importar. O arquivo selecionado não é um backup válido.');
-        }
+            if (data.bills && data.members) {
+                appState = { ...appState, ...data };
+                appState.settings.viewPivot = new Date();
+                saveStore();
+                alert('Dados sincronizados com sucesso! 🚀');
+            } else throw new Error();
+        } catch (err) { alert('Arquivo de backup inválido.'); }
     };
     reader.readAsText(file);
 }
 
-// --- ENGINE DE RENDERIZAÇÃO ---
-const ui = {
-    totalPending: document.getElementById('total-pending-big'),
-    totalPaid: document.getElementById('total-paid'),
-    monthLabel: document.getElementById('label-month'),
-    yearLabel: document.getElementById('label-year'),
-    pendingList: document.getElementById('list-pending'),
-    paidList: document.getElementById('list-paid'),
-    paidCount: document.getElementById('paid-total-count'),
-    pills: document.getElementById('member-filters'),
-    calTitle: document.getElementById('cal-title'),
-    calGrid: document.getElementById('calendar-grid')
+// --- CORE RENDER ENGINE ---
+const el = {
+    pending: document.getElementById('pending-val'),
+    paid: document.getElementById('paid-val'),
+    month: document.getElementById('cur-month'),
+    year: document.getElementById('cur-year'),
+    pStack: document.getElementById('pending-stack'),
+    hStack: document.getElementById('paid-stack'),
+    hTotal: document.getElementById('paid-total'),
+    filters: document.getElementById('filter-bar'),
+    calGrid: document.getElementById('cal-grid'),
+    calTitle: document.getElementById('cal-title')
 };
 
-function renderizar() {
-    const m = state.viewData.getMonth();
-    const y = state.viewData.getFullYear();
-    const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+function syncUI() {
+    const pivot = appState.settings.viewPivot;
+    const m = pivot.getMonth();
+    const y = pivot.getFullYear();
+    const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
-    ui.monthLabel.innerText = meses[m];
-    ui.yearLabel.innerText = y;
-    document.querySelectorAll('.month-name-small').forEach(el => el.innerText = meses[m]);
+    el.month.innerText = months[m];
+    el.year.innerText = y;
 
-    // Filtragem por Mês
-    const contasMes = state.contas.filter(c => {
-        const d = new Date(c.data);
+    // Filtered data for context
+    const monthBills = appState.bills.filter(b => {
+        const d = new Date(b.date);
         return d.getMonth() === m && d.getFullYear() === y;
     });
 
-    // Totais do Dashboard
-    const somaPendente = contasMes.filter(c => !c.paga).reduce((acc, c) => acc + parseFloat(c.valor), 0);
-    const somaPaga = contasMes.filter(c => c.paga).reduce((acc, c) => acc + parseFloat(c.valor), 0);
+    // Totals
+    const tp = monthBills.filter(b => !b.paid).reduce((acc, b) => acc + parseFloat(b.value), 0);
+    const th = monthBills.filter(b => b.paid).reduce((acc, b) => acc + parseFloat(b.value), 0);
 
-    ui.totalPending.innerText = formatarBRL(somaPendente);
-    ui.totalPaid.innerText = formatarBRL(somaPaga);
+    el.pending.innerText = formatBRL(tp);
+    el.paid.innerText = formatBRL(th);
 
-    renderPills();
-    renderListas(contasMes);
-    renderCalendario();
-    syncForms();
+    renderFilters();
+    renderLists(monthBills);
+    renderCalendar();
+    syncSelectors();
+    renderSettingsPills();
 }
 
-function renderPills() {
-    ui.pills.innerHTML = '';
-    ['Tudo', ...state.membros].forEach(mem => {
+function renderFilters() {
+    el.filters.innerHTML = '';
+    ['Tudo', ...appState.members].forEach(m => {
         const btn = document.createElement('button');
-        btn.className = `pill ${state.filtros.membro === mem ? 'active' : ''}`;
-        btn.innerText = mem;
-        btn.onclick = () => { state.filtros.membro = mem; state.filtros.dia = null; salvarLocal(); };
-        ui.pills.appendChild(btn);
+        btn.className = `pill ${appState.settings.activeFilter === m ? 'active' : ''}`;
+        btn.innerText = m;
+        btn.onclick = () => { appState.settings.activeFilter = m; appState.settings.activeDate = null; saveStore(); };
+        el.filters.appendChild(btn);
     });
 }
 
-function renderListas(contasMes) {
-    ui.pendingList.innerHTML = '';
-    ui.paidList.innerHTML = '';
+function renderLists(monthBills) {
+    el.pStack.innerHTML = '';
+    el.hStack.innerHTML = '';
 
-    const filtradas = contasMes.filter(c => {
-        const matchM = state.filtros.membro === 'Tudo' || c.membro === state.filtros.membro;
-        const matchD = !state.filtros.dia || new Date(c.data).getUTCDate() === state.filtros.dia;
-        return matchM && matchD;
+    const finalSet = monthBills.filter(b => {
+        const mOk = appState.settings.activeFilter === 'Tudo' || b.member === appState.settings.activeFilter;
+        const dOk = !appState.settings.activeDate || new Date(b.date).getUTCDate() === appState.settings.activeDate;
+        return mOk && dOk;
     });
 
-    let contPago = 0;
-    filtradas.forEach(c => {
-        const bancoObj = state.bancos.find(b => b.nome === c.banco) || { cor: '#ccc' };
+    let countH = 0;
+    finalSet.forEach(b => {
+        const bank = appState.banks.find(bk => bk.name === b.bank) || { color: '#666' };
         const card = document.createElement('div');
-        card.className = `bill-card ${c.paga ? 'paid-faded' : ''}`;
+        card.className = `card-bill ${b.paid ? 'opacity-low' : ''}`;
         card.innerHTML = `
-            <div class="b-card-info">
-                <div class="b-badges">
-                    <span class="badge" style="background:${bancoObj.cor}">${c.banco}</span>
-                    <span class="badge badge-m">${c.membro}</span>
+            <div class="bill-head">
+                <div class="tag-row">
+                    <span class="mini-tag" style="background:${bank.color}">${b.bank}</span>
+                    <span class="mini-tag mem-tag">${b.member}</span>
                 </div>
-                <span class="b-title">${c.titulo}</span>
-                <span class="b-date">Vence dia ${new Date(c.data).getUTCDate()}</span>
+                <span class="bill-title">${b.title}</span>
+                <span class="bill-meta-info">Vencimento dia ${new Date(b.date).getUTCDate()}</span>
             </div>
-            <div class="b-card-actions">
-                <span class="b-value">${formatarBRL(c.valor)}</span>
-                ${!c.paga ? `<button class="btn-check" onclick="togglePago(${c.id})">✓</button>` : '✅'}
-                <button onclick="excluirConta(${c.id})" style="margin-left:8px; border:none; background:none; opacity:0.1; color:red; font-size:10px;">EXCLUIR</button>
+            <div class="bill-side">
+                <span class="bill-cost">${formatBRL(b.value)}</span>
+                ${!b.paid ? `<button class="check-btn" onclick="toggleBill(${b.id})">✓</button>` : '✅'}
+                <button onclick="delBill(${b.id})" style="border:none; background:none; color:red; font-size:9px; margin-left:10px; opacity:0.2;">X</button>
             </div>
         `;
 
-        if (c.paga) {
-            ui.paidList.appendChild(card);
-            contPago++;
-        } else {
-            ui.pendingList.appendChild(card);
-        }
+        if (b.paid) { el.hStack.appendChild(card); countH++; }
+        else { el.pStack.appendChild(card); }
     });
 
-    ui.paidCount.innerText = contPago;
-    if (ui.pendingList.innerHTML === '') ui.pendingList.innerHTML = '<p style="text-align:center; opacity:0.3; padding:20px;">Tudo limpo por aqui! ✨</p>';
+    el.hTotal.innerText = countH;
+    if (el.pStack.innerHTML === '') el.pStack.innerHTML = '<p style="text-align:center; padding:20px; opacity:0.3; font-size:0.8rem;">Status: Organizado ✨</p>';
 }
 
-function renderCalendario() {
-    ui.calGrid.innerHTML = '';
-    const y = state.viewData.getFullYear();
-    const m = state.viewData.getMonth();
-    ui.calTitle.innerText = `${ui.monthLabel.innerText} ${y}`;
+function renderCalendar() {
+    el.calGrid.innerHTML = '';
+    const y = appState.settings.viewPivot.getFullYear();
+    const m = appState.settings.viewPivot.getMonth();
+    el.calTitle.innerText = `${el.month.innerText} ${y}`;
 
-    const primeiroDia = new Date(y, m, 1).getDay();
-    const ultimoDia = new Date(y, m + 1, 0).getDate();
+    const firstDay = new Date(y, m, 1).getDay();
+    const lastDate = new Date(y, m + 1, 0).getDate();
 
-    // Espaços vazios iniciais
-    for (let i = 0; i < primeiroDia; i++) ui.calGrid.appendChild(document.createElement('div'));
+    for (let i = 0; i < firstDay; i++) el.calGrid.appendChild(document.createElement('div'));
 
-    for (let d = 1; d <= ultimoDia; d++) {
-        const dDiv = document.createElement('div');
-        dDiv.className = `cal-day ${state.filtros.dia === d ? 'selected' : ''}`;
-        dDiv.innerText = d;
+    for (let d = 1; d <= lastDate; d++) {
+        const cell = document.createElement('div');
+        cell.className = `day-cell ${appState.settings.activeDate === d ? 'active-sel' : ''}`;
+        cell.innerText = d;
 
-        // Marcadores Coloridos
-        const contasDia = state.contas.filter(c => {
-            const date = new Date(c.data);
-            return date.getUTCDate() === d && date.getUTCMonth() === m && date.getUTCFullYear() === y && !c.paga;
+        const dayBills = appState.bills.filter(b => {
+            const date = new Date(b.date);
+            return date.getUTCDate() === d && date.getUTCMonth() === m && date.getUTCFullYear() === y && !b.paid;
         });
 
-        if (contasDia.length > 0) {
-            const dots = document.createElement('div');
-            dots.className = 'day-dots';
-            contasDia.slice(0, 3).forEach(c => {
-                const bO = state.bancos.find(b => b.nome === c.banco) || { cor: '#ccc' };
+        if (dayBills.length > 0) {
+            const markers = document.createElement('div');
+            markers.className = 'cal-marker';
+            dayBills.slice(0, 3).forEach(b => {
+                const bnk = appState.banks.find(bk => bk.name === b.bank) || { color: '#666' };
                 const dot = document.createElement('div');
-                dot.className = 'dot';
-                dot.style.background = bO.cor;
-                dots.appendChild(dot);
+                dot.className = 'marker-dot';
+                dot.style.background = bnk.color;
+                markers.appendChild(dot);
             });
-            dDiv.appendChild(dots);
+            cell.appendChild(markers);
         }
 
-        if (d === new Date().getDate() && m === new Date().getMonth()) dDiv.classList.add('today');
+        if (d === new Date().getDate() && m === new Date().getMonth() && y === new Date().getFullYear()) {
+            cell.classList.add('today-is');
+        }
 
-        dDiv.onclick = () => {
-            state.filtros.dia = (state.filtros.dia === d) ? null : d;
-            fecharModais();
-            salvarLocal();
+        cell.onclick = () => {
+            appState.settings.activeDate = (appState.settings.activeDate === d) ? null : d;
+            closeModals();
+            saveStore();
         };
-        ui.calGrid.appendChild(dDiv);
+        el.calGrid.appendChild(cell);
     }
 }
 
-// --- COMANDOS ---
-function togglePago(id) {
-    const idx = state.contas.findIndex(c => c.id === id);
-    if (idx !== -1) { state.contas[idx].paga = !state.contas[idx].paga; salvarLocal(); }
+// --- ACTIONS ---
+function toggleBill(id) {
+    const i = appState.bills.findIndex(b => b.id === id);
+    if (i !== -1) { appState.bills[i].paid = !appState.bills[i].paid; saveStore(); }
 }
 
-function excluirConta(id) {
-    if (confirm('Excluir esta conta permanentemente?')) {
-        state.contas = state.contas.filter(c => c.id !== id);
-        salvarLocal();
+function delBill(id) {
+    if (confirm('Deletar permanentemente?')) {
+        appState.bills = appState.bills.filter(b => b.id !== id);
+        saveStore();
     }
 }
 
-function alternarTema() {
-    state.theme = state.theme === 'light' ? 'dark' : 'light';
-    aplicarTema();
-    salvarLocal();
+function toggleTheme() {
+    appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
+    applyTheme();
+    saveStore();
 }
 
-// --- INTERAÇÕES ---
-document.getElementById('prev-month').onclick = () => { state.viewData.setMonth(state.viewData.getMonth() - 1); state.filtros.dia = null; salvarLocal(); };
-document.getElementById('next-month').onclick = () => { state.viewData.setMonth(state.viewData.getMonth() + 1); state.filtros.dia = null; salvarLocal(); };
-document.getElementById('theme-switch').onclick = alternarTema;
-document.getElementById('open-calendar').onclick = () => document.getElementById('modal-calendar').style.display = 'flex';
+// --- APP BINDINGS ---
+document.getElementById('prev-m').onclick = () => { appState.settings.viewPivot.setMonth(appState.settings.viewPivot.getMonth() - 1); appState.settings.activeDate = null; saveStore(); };
+document.getElementById('next-m').onclick = () => { appState.settings.viewPivot.setMonth(appState.settings.viewPivot.getMonth() + 1); appState.settings.activeDate = null; saveStore(); };
+document.getElementById('theme-btn').onclick = toggleTheme;
+document.getElementById('export-btn').onclick = doExport;
+document.getElementById('import-trigger').onclick = () => document.getElementById('import-file').click();
+document.getElementById('import-file').onchange = doImport;
+
+document.getElementById('open-cal').onclick = () => document.getElementById('modal-cal').style.display = 'flex';
 document.getElementById('open-settings').onclick = () => document.getElementById('modal-settings').style.display = 'flex';
-document.getElementById('add-bill-btn').onclick = () => document.getElementById('modal-form').style.display = 'flex';
-document.querySelectorAll('.close-modal').forEach(b => b.onclick = fecharModais);
+document.getElementById('fab-add').onclick = () => document.getElementById('modal-bill').style.display = 'flex';
 
-function fecharModais() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+function closeModals() { document.querySelectorAll('.modal-root').forEach(m => m.style.display = 'none'); }
+document.querySelectorAll('.btn-close').forEach(b => b.onclick = closeModals);
 
-// Backup
-document.getElementById('export-backup').onclick = exportarBackup;
-document.getElementById('trigger-import').onclick = () => document.getElementById('import-file').click();
-document.getElementById('import-file').onchange = importarBackup;
-
-// Formulário de Nova Conta
-document.getElementById('bill-form').onsubmit = (e) => {
+document.getElementById('form-bill').onsubmit = (e) => {
     e.preventDefault();
-    state.contas.push({
+    appState.bills.push({
         id: Date.now(),
-        titulo: document.getElementById('bill-title').value,
-        valor: document.getElementById('bill-value').value,
-        data: document.getElementById('bill-date').value,
-        membro: document.getElementById('bill-member').value,
-        banco: document.getElementById('bill-bank').value,
-        paga: false
+        title: document.getElementById('b-title').value,
+        value: document.getElementById('b-value').value,
+        date: document.getElementById('b-date').value,
+        member: document.getElementById('b-member').value,
+        bank: document.getElementById('b-bank').value,
+        paid: false
     });
     e.target.reset();
-    fecharModais();
-    salvarLocal();
+    closeModals();
+    saveStore();
 };
 
-// --- CONFIGURAÇÕES & TAGS ---
-function syncForms() {
-    const mS = document.getElementById('bill-member');
-    const bS = document.getElementById('bill-bank');
+// --- SETTINGS LOGIC ---
+function syncSelectors() {
+    const mS = document.getElementById('b-member');
+    const bS = document.getElementById('b-bank');
     mS.innerHTML = ''; bS.innerHTML = '';
-    state.membros.forEach(m => mS.innerHTML += `<option value="${m}">${m}</option>`);
-    state.bancos.forEach(b => bS.innerHTML += `<option value="${b.nome}">${b.nome}</option>`);
-
-    renderTagsSettings();
+    appState.members.forEach(m => mS.innerHTML += `<option value="${m}">${m}</option>`);
+    appState.banks.forEach(b => bS.innerHTML += `<option value="${b.name}">${b.name}</option>`);
 }
 
-function renderTagsSettings() {
-    const listM = document.getElementById('settings-members');
-    const listB = document.getElementById('settings-banks');
-    listM.innerHTML = ''; listB.innerHTML = '';
+function renderSettingsPills() {
+    const mC = document.getElementById('set-members');
+    const bC = document.getElementById('set-banks');
+    mC.innerHTML = ''; bC.innerHTML = '';
 
-    state.membros.forEach(m => {
+    appState.members.forEach(m => {
         const div = document.createElement('div');
-        div.className = 't-pill';
-        div.innerHTML = `<span>${m}</span> <button class="del-btn" onclick="removerTag('${m}', 'm')">×</button>`;
-        listM.appendChild(div);
+        div.className = 'rem-pill';
+        div.innerHTML = `<span>${m}</span> <button class="btn-del-mini" onclick="remItem('${m}', 'm')">×</button>`;
+        mC.appendChild(div);
     });
 
-    state.bancos.forEach(b => {
+    appState.banks.forEach(b => {
         const div = document.createElement('div');
-        div.className = 't-pill';
-        div.innerHTML = `<span style="color:${b.cor}">●</span> <span>${b.nome}</span> <button class="del-btn" onclick="removerTag('${b.nome}', 'b')">×</button>`;
-        listB.appendChild(div);
+        div.className = 'rem-pill';
+        div.innerHTML = `<span style="color:${b.color}">●</span> <span>${b.name}</span> <button class="btn-del-mini" onclick="remItem('${b.name}', 'b')">×</button>`;
+        bC.appendChild(div);
     });
 }
 
-function removerTag(nome, tipo) {
-    if (confirm(`Remover ${nome}?`)) {
-        if (tipo === 'm') state.membros = state.membros.filter(x => x !== nome);
-        else state.bancos = state.bancos.filter(x => x.nome !== nome);
-        salvarLocal();
+function remItem(name, type) {
+    if (confirm(`Remover ${name}?`)) {
+        if (type === 'm') appState.members = appState.members.filter(x => x !== name);
+        else appState.banks = appState.banks.filter(x => x.name !== name);
+        saveStore();
     }
 }
 
-document.getElementById('btn-add-member').onclick = () => {
-    const inp = document.getElementById('new-member');
-    if (inp.value) { state.membros.push(inp.value); inp.value = ''; salvarLocal(); }
+document.getElementById('add-mem-btn').onclick = () => {
+    const i = document.getElementById('new-mem');
+    if (i.value) { appState.members.push(i.value); i.value = ''; saveStore(); }
 };
 
-document.getElementById('btn-add-bank').onclick = () => {
-    const n = document.getElementById('new-bank');
-    const c = document.getElementById('bank-color');
-    if (n.value) { state.bancos.push({ nome: n.value, cor: c.value }); n.value = ''; salvarLocal(); }
+document.getElementById('add-bnk-btn').onclick = () => {
+    const n = document.getElementById('new-bnk');
+    const c = document.getElementById('bnk-color');
+    if (n.value) { appState.banks.push({ name: n.value, color: c.value }); n.value = ''; saveStore(); }
 };
 
-// --- AUXILIARES ---
-function formatarBRL(v) {
-    return `R$ ${parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-}
+// --- HELPERS ---
+function formatBRL(v) { return `R$ ${parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`; }
 
-// --- BOOTSTRAP ---
-carregarLocal();
+// --- INIT ---
+loadStore();
