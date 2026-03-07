@@ -21,6 +21,16 @@ const dbConfig = {
 const pool = mysql.createPool(dbConfig);
 const db = pool.promise();
 
+// Teste de conexão no início
+pool.getConnection()
+    .then(conn => {
+        console.log('✅ Conectado ao banco de dados com sucesso!');
+        conn.release();
+    })
+    .catch(err => {
+        console.error('❌ ERRO AO CONECTAR AO BANCO:', err.message);
+    });
+
 // --- ROTAS DE API (Prefixadas com /api para Vercel) ---
 
 app.get('/api/membros', async (req, res) => {
@@ -87,12 +97,5 @@ app.patch('/api/contas/:id/pagar', async (req, res) => {
     }
 });
 
-// Para rodar localmente fora da Vercel
-if (process.env.NODE_ENV !== 'production') {
-    const port = 3000;
-    app.listen(port, () => {
-        console.log(`Servidor local: http://localhost:${port}`);
-    });
-}
-
+// Exporta para ser usado pelo server.js local ou pela Vercel
 module.exports = app;

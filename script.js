@@ -1,10 +1,8 @@
-// 1. CONFIGURAÇÃO DE AMBIENTE
-// Se estiver rodando localmente (file://), define o IP do seu computador manualmente aqui.
-// Se estiver na Vercel ou acessando via servidor, ele usa o hostname atual.
-const LOCAL_IP = '192.168.1.15'; // <--- MUDE PARA O SEU IP PARA TESTAR NO CELULAR LOCALMENTE
-const isLocalFile = window.location.protocol === 'file:';
-const API_BASE = isLocalFile
-    ? `http://${LOCAL_IP}:3000/api`
+// 1. CONFIGURAÇÃO DE AMBIENTE (FOCO VERCEL)
+// O projeto agora usa exclusivamente a estrutura da Vercel.
+// A API deve ser acessada via caminho relativo para funcionar em qualquer domínio.
+const API_BASE = (window.location.hostname === '' || window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.protocol !== 'https:'
+    ? `http://localhost:3000/api` // Fallback para desenvolvimento local
     : `${window.location.origin}/api`;
 
 let accounts = [];
@@ -54,6 +52,11 @@ function renderAll() {
 function renderPills() {
     folderPills.innerHTML = '';
 
+    if (categories.length === 0) {
+        folderPills.innerHTML = '<p style="font-size: 0.8rem; opacity: 0.5;">Crie uma pasta para começar...</p>';
+        return;
+    }
+
     // Pill "Tudo"
     const btnAll = document.createElement('button');
     btnAll.className = `pill ${currentCategory === 'Tudo' ? 'active' : ''}`;
@@ -77,6 +80,16 @@ function renderBills() {
     const filtered = currentCategory === 'Tudo'
         ? accounts
         : accounts.filter(acc => acc.categoria === currentCategory);
+
+    if (filtered.length === 0) {
+        billsList.innerHTML = `
+            <div style="text-align: center; padding: 40px; opacity: 0.5;">
+                <p>Nenhuma conta pendente aqui. ✨</p>
+            </div>
+        `;
+        totalAmountText.innerText = 'R$ 0,00';
+        return;
+    }
 
     filtered.forEach(bill => {
         if (bill.status === 'pendente') {
@@ -179,10 +192,18 @@ async function addFolder(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nome })
         });
-        if (!res.ok) throw new Error();
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || 'Erro desconhecido no servidor');
+        }
+
         nomeInput.value = '';
         atualizarDados();
-    } catch (e) { alert('Erro ao criar pasta. Verifique a conexão.'); }
+    } catch (e) {
+        console.error('Erro ao criar pasta:', e);
+        alert(`Erro ao criar pasta: ${e.message}\n\nVerifique se o servidor está rodando e se o banco de dados está configurado.`);
+    }
 }
 
 // 5. AUXILIARES E EVENTOS
