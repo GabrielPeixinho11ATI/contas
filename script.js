@@ -144,17 +144,33 @@ function renderFolderManager() {
 // 4. AÇÕES (FETCH POST/PATCH)
 async function markAsPaid(id) {
     try {
-        await fetch(`${API_BASE}/contas/${id}/pagar`, { method: 'PATCH' });
+        const res = await fetch(`${API_BASE}/contas/${id}/pagar`, { method: 'PATCH' });
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('Erro do servidor (Raw):', errorText);
+            throw new Error('Falha ao atualizar status');
+        }
         atualizarDados();
-    } catch (e) { alert('Erro ao processar pagamento'); }
+    } catch (e) {
+        console.error(e);
+        alert('Erro ao processar pagamento');
+    }
 }
 
 async function deleteFolder(id) {
     if (confirm('Deseja excluir esta pasta?')) {
         try {
-            await fetch(`${API_BASE}/membros/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE}/membros/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('Erro do servidor (Raw):', errorText);
+                throw new Error('Falha ao excluir');
+            }
             atualizarDados();
-        } catch (e) { alert('Erro ao excluir pasta'); }
+        } catch (e) {
+            console.error(e);
+            alert('Erro ao excluir pasta');
+        }
     }
 }
 
@@ -173,11 +189,19 @@ async function addBill(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        if (!res.ok) throw new Error();
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('Erro do servidor (Raw):', errorText);
+            throw new Error();
+        }
+
         billForm.reset();
         modalBill.style.display = 'none';
         atualizarDados();
-    } catch (e) { alert('Erro ao adicionar conta. O servidor está rodando?'); }
+    } catch (e) {
+        alert('Erro ao adicionar conta. Verifique o console (F12) para detalhes.');
+    }
 }
 
 async function addFolder(event) {
@@ -194,15 +218,23 @@ async function addFolder(event) {
         });
 
         if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.error || 'Erro desconhecido no servidor');
+            // Se falhar, tenta ler como texto puros para depuração
+            const errorRaw = await res.text();
+            console.error('DEBUG: Resposta bruta do servidor:', errorRaw);
+
+            try {
+                const errorJSON = JSON.parse(errorRaw);
+                throw new Error(errorJSON.error || 'Erro no servidor');
+            } catch (jsonErr) {
+                throw new Error('O servidor não enviou um JSON válido. Veja o Console (F12).');
+            }
         }
 
         nomeInput.value = '';
         atualizarDados();
     } catch (e) {
-        console.error('Erro ao criar pasta:', e);
-        alert(`Erro ao criar pasta: ${e.message}\n\nVerifique se o servidor está rodando e se o banco de dados está configurado.`);
+        console.error('Erro completo:', e);
+        alert(`Erro ao criar pasta: ${e.message}`);
     }
 }
 
