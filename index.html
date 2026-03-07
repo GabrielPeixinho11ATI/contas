@@ -4,169 +4,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finanças Pro - Organizador Familiar</title>
+    <title>Finanças Familiar Pro - V7</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="app-container">
-        <!-- Topo com Navegação e Dark Mode -->
-        <header class="app-header">
-            <nav class="month-selector">
-                <button id="prev-month" class="nav-btn">&lt;</button>
-                <div class="current-month">
-                    <span id="display-month">Março</span>
-                    <span id="display-year">2026</span>
+        <!-- HEADER: Navegação e Tema -->
+        <header class="main-header">
+            <nav class="month-nav">
+                <button id="prev-month" class="nav-arrow">&lt;</button>
+                <div class="month-info">
+                    <span id="label-month">Janeiro</span>
+                    <span id="label-year">2026</span>
                 </div>
-                <button id="next-month" class="nav-btn">&gt;</button>
+                <button id="next-month" class="nav-arrow">&gt;</button>
             </nav>
-            <button id="theme-toggle" class="theme-btn" title="Alternar Tema">
-                <span class="icon-light">☀️</span>
-                <span class="icon-dark">🌙</span>
+            <button id="theme-switch" class="theme-btn">
+                <span class="sun-icon">☀️</span>
+                <span class="moon-icon">🌙</span>
             </button>
         </header>
 
-        <!-- Dashboard Financeiro -->
-        <section class="dashboard">
-            <div class="stat-main">
-                <p>Total Pendente</p>
-                <h2 id="total-pending">R$ 0,00</h2>
-            </div>
-            <div class="stat-row">
-                <div class="stat-item">
-                    <span>Pago</span>
-                    <p id="total-paid">R$ 0,00</p>
-                </div>
-                <div class="stat-item">
-                    <span>Saldo</span>
-                    <p id="total-balance">R$ 0,00</p>
+        <!-- DASHBOARD HERO: Total Pendente Centralizado -->
+        <section class="dashboard-hero">
+            <div class="hero-content">
+                <p class="hero-label">Total Pendente</p>
+                <h1 id="total-pending-big">R$ 0,00</h1>
+                <div class="hero-stats-row">
+                    <span>Pago: <strong id="total-paid">R$ 0,00</strong></span>
                 </div>
             </div>
         </section>
 
-        <!-- Ações e Filtros -->
-        <section class="quick-actions">
-            <button id="open-calendar" class="action-btn">
-                <span class="icon">📅</span> Calendário
+        <!-- BACKUP SECTION: Visibilidade Máxima -->
+        <section class="backup-tool-bar">
+            <button id="export-backup" class="btn-backup-huge export">
+                <span class="icon">�</span>
+                <span class="text">Exportar Backup</span>
             </button>
-            <button id="manage-settings" class="action-btn">
-                <span class="icon">⚙️</span> Ajustes
+            <button id="trigger-import" class="btn-backup-huge import">
+                <span class="icon">📥</span>
+                <span class="text">Importar Backup</span>
             </button>
+            <input type="file" id="import-file" style="display: none;" accept=".json">
         </section>
 
-        <!-- Lista de Pendências -->
-        <main class="main-content">
-            <div class="section-title">
-                <h3>Contas Pendentes</h3>
-                <div class="pills-scroll" id="member-filters">
-                    <!-- Filtros de membros via JS -->
-                </div>
+        <!-- AÇÕES RÁPIDAS -->
+        <div class="quick-icons">
+            <button id="open-calendar" class="icon-action-btn">📅 Ver Calendário</button>
+            <button id="open-settings" class="icon-action-btn">⚙️ Configurações</button>
+        </div>
+
+        <!-- LISTAS DE CONTAS -->
+        <main class="content-feed">
+            <div class="section-top">
+                <h3>Contas de <span class="month-name-small">Janeiro</span></h3>
+                <div id="member-filters" class="pills-container"></div>
             </div>
 
-            <div id="pending-list" class="bill-grid">
-                <!-- Contas pendentes -->
+            <div id="list-pending" class="bills-stack">
+                <!-- Injetado via JS -->
             </div>
 
-            <!-- Histórico de Pagos -->
-            <details class="history-section">
-                <summary>Histórico de Pagos (<span id="paid-count">0</span>)</summary>
-                <div id="paid-list" class="bill-grid">
-                    <!-- Contas pagas -->
-                </div>
+            <details class="paid-history">
+                <summary>Contas Concluídas (<span id="paid-total-count">0</span>)</summary>
+                <div id="list-paid" class="bills-stack paid-faded"></div>
             </details>
         </main>
 
-        <!-- FAB: Adicionar -->
-        <button id="add-bill" class="fab">+</button>
-    </div>
-
-    <!-- MODAL: NOVA CONTA -->
-    <div id="modal-bill" class="modal-overlay">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h2>Nova Conta</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <form id="bill-form">
-                <div class="input-group">
-                    <label>O que você pagou?</label>
-                    <input type="text" id="bill-title" placeholder="Ex: Internet, Aluguel..." required>
-                </div>
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Valor (R$)</label>
-                        <input type="number" id="bill-value" step="0.01" placeholder="0,00" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Data</label>
-                        <input type="date" id="bill-date" required>
-                    </div>
-                </div>
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Quem?</label>
-                        <select id="bill-member" required></select>
-                    </div>
-                    <div class="input-group">
-                        <label>Banco</label>
-                        <select id="bill-bank" required></select>
-                    </div>
-                </div>
-                <button type="submit" class="btn-submit">Criar Conta</button>
-            </form>
-        </div>
+        <!-- FAB: Adicionar Conta -->
+        <button id="add-bill-btn" class="fab">+</button>
     </div>
 
     <!-- MODAL: CALENDÁRIO -->
     <div id="modal-calendar" class="modal-overlay">
-        <div class="modal-card calendar-card">
+        <div class="modal-card">
             <div class="modal-header">
-                <h2 id="cal-month-title">Março 2026</h2>
+                <h2 id="cal-title">Janeiro 2026</h2>
                 <button class="close-modal">&times;</button>
             </div>
-            <div class="calendar-wrapper">
-                <div class="cal-days-head">
-                    <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+            <div class="calendar-view">
+                <div class="cal-weekdays">
+                    <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
                 </div>
-                <div id="calendar-body" class="cal-grid">
-                    <!-- Dias via JS -->
-                </div>
+                <div id="calendar-grid" class="cal-grid"></div>
             </div>
+            <p class="cal-hint">Toque num dia para filtrar.</p>
         </div>
     </div>
 
-    <!-- MODAL: AJUSTES (Membros e Bancos Coloridos) -->
-    <div id="modal-settings" class="modal-overlay">
+    <!-- MODAL: NOVA CONTA -->
+    <div id="modal-form" class="modal-overlay">
         <div class="modal-card">
+            <div class="modal-header">
+                <h2>Nova Despesa</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="bill-form">
+                <div class="f-group">
+                    <label>Título da Conta</label>
+                    <input type="text" id="bill-title" placeholder="Ex: Cartão, Luz..." required>
+                </div>
+                <div class="f-row">
+                    <div class="f-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" id="bill-value" step="0.01" placeholder="0,00" required>
+                    </div>
+                    <div class="f-group">
+                        <label>Vencimento</label>
+                        <input type="date" id="bill-date" required>
+                    </div>
+                </div>
+                <div class="f-row">
+                    <div class="f-group">
+                        <label>Pasta (Membro)</label>
+                        <select id="bill-member" required></select>
+                    </div>
+                    <div class="f-group">
+                        <label>Banco</label>
+                        <select id="bill-bank" required></select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-save">Salvar Despesa</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIGURAÇÕES -->
+    <div id="modal-settings" class="modal-overlay">
+        <div class="modal-card scroll">
             <div class="modal-header">
                 <h2>Configurações</h2>
                 <button class="close-modal">&times;</button>
             </div>
 
-            <div class="settings-scroll">
-                <section class="set-section">
-                    <h3>Membros da Família</h3>
-                    <div class="add-box">
-                        <input type="text" id="new-member" placeholder="Nome...">
-                        <button id="btn-add-member">+</button>
-                    </div>
-                    <div id="list-members" class="tag-cloud"></div>
-                </section>
+            <section class="mg-section">
+                <h3>Gerenciar Membros</h3>
+                <div class="add-ui">
+                    <input type="text" id="new-member" placeholder="Nome...">
+                    <button id="btn-add-member">+</button>
+                </div>
+                <div id="settings-members" class="tags-list"></div>
+            </section>
 
-                <section class="set-section">
-                    <h3>Bancos e Cores</h3>
-                    <div class="add-box">
-                        <input type="text" id="new-bank" placeholder="Nome do Banco...">
-                        <input type="color" id="bank-color" value="#60a5fa">
-                        <button id="btn-add-bank">+</button>
-                    </div>
-                    <div id="list-banks" class="tag-cloud"></div>
-                </section>
-            </div>
+            <section class="mg-section">
+                <h3>Gerenciar Bancos</h3>
+                <div class="add-ui">
+                    <input type="text" id="new-bank" placeholder="Banco...">
+                    <input type="color" id="bank-color" value="#3b82f6">
+                    <button id="btn-add-bank">+</button>
+                </div>
+                <div id="settings-banks" class="tags-list"></div>
+            </section>
         </div>
     </div>
 
