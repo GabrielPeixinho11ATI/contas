@@ -1,259 +1,334 @@
-// 1. CONFIGURAÇÃO DE AMBIENTE (FOCO VERCEL)
-// O projeto agora usa exclusivamente a estrutura da Vercel.
-// A API deve ser acessada via caminho relativo para funcionar em qualquer domínio.
-const API_BASE = (window.location.hostname === '' || window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.protocol !== 'https:'
-    ? `http://localhost:3000/api` // Fallback para desenvolvimento local
-    : `${window.location.origin}/api`;
+/**
+ * FINANÇAS PRO V4 - LOGIC ENGINE
+ * 100% Client-Side / LocalStorage
+ */
 
-let accounts = [];
-let categories = [];
-let currentCategory = 'Tudo';
-
-// Elementos do DOM
-const billsList = document.getElementById('bills-list');
-const totalAmountText = document.getElementById('total-amount');
-const modalBill = document.getElementById('modal-overlay');
-const modalFolder = document.getElementById('modal-folders');
-const openModalBtn = document.getElementById('open-modal');
-const openFolderModalBtn = document.getElementById('manage-folders');
-const billForm = document.getElementById('bill-form');
-const folderForm = document.getElementById('folder-form');
-const folderPills = document.getElementById('folder-pills');
-const categorySelect = document.getElementById('categoria_conta');
-const folderListManager = document.getElementById('folder-list-manager');
-
-// 2. SINCRONIZAÇÃO EM TEMPO REAL
-async function atualizarDados() {
-    try {
-        const [resContas, resMembros] = await Promise.all([
-            fetch(`${API_BASE}/contas`),
-            fetch(`${API_BASE}/membros`)
-        ]);
-
-        if (!resContas.ok || !resMembros.ok) throw new Error('Falha na resposta do servidor');
-
-        accounts = await resContas.json();
-        categories = await resMembros.json();
-
-        renderAll();
-    } catch (error) {
-        console.error('Erro de conexão:', error);
+// --- ESTADO INICIAL ---
+let state = {
+    theme: 'light',
+    membros: ["Geral", "Família"],
+    bancos: [
+        { nome: "Nubank", cor: "#8a05be" },
+        { nome: "Itaú", cor: "#ec7000" },
+        { nome: "Inter", cor: "#ff7a00" }
+    ],
+    contas: [],
+    viewDate: new Date(), // Mês atual
+    filters: {
+        membro: 'Tudo',
+        dia: null
     }
+};
+
+// --- PERSISTÊNCIA ---
+function loadData() {
+    const saved = localStorage.getItem('financas_pro_v4');
+    if (saved) {
+        const parsed = JSON.parse(saved);
+        state = { ...state, ...parsed };
+        state.viewDate = new Date(state.viewDate);
+    }
+    applyTheme();
+    render();
 }
 
-// 3. RENDERIZAÇÃO
-function renderAll() {
-    renderPills();
+function saveData() {
+    localStorage.setItem('financas_pro_v4', JSON.stringify(state));
+    render();
+}
+
+// --- TEMA ---
+function applyTheme() {
+    document.documentElement.setAttribute('data-theme', state.theme);
+}
+
+document.getElementById('theme-toggle').onclick = () => {
+    state.theme = state.theme === 'light' ? 'dark' : 'light';
+    saveData();
+    applyTheme();
+};
+
+// --- SELETORES DOM ---
+const dom = {
+    totalPending: document.getElementById('total-pending'),
+    totalPaid: document.getElementById('total-paid'),
+    totalBalance: document.getElementById('total-balance'),
+    displayMonth: document.getElementById('display-month'),
+    displayYear: document.getElementById('display-year'),
+    pendingList: document.getElementById('pending-list'),
+    paidList: document.getElementById('paid-list'),
+    paidCount: document.getElementById('paid-count'),
+    memberFilters: document.getElementById('member-filters'),
+    calendarBody: document.getElementById('calendar-body'),
+    calMonthTitle: document.getElementById('cal-month-title')
+};
+
+// --- RENDERIZAÇÃO ---
+function render() {
+    renderDashboard();
+    renderFilters();
     renderBills();
+    renderCalendar();
     updateSelectors();
-    renderFolderManager();
+    renderSettings();
 }
 
-function renderPills() {
-    folderPills.innerHTML = '';
+function renderDashboard() {
+    const month = state.viewDate.getMonth();
+    const year = state.viewDate.getFullYear();
 
-    if (categories.length === 0) {
-        folderPills.innerHTML = '<p style="font-size: 0.8rem; opacity: 0.5;">Crie uma pasta para começar...</p>';
-        return;
-    }
+    const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    dom.displayMonth.innerText = months[month];
+    dom.displayYear.innerText = year;
 
-    // Pill "Tudo"
-    const btnAll = document.createElement('button');
-    btnAll.className = `pill ${currentCategory === 'Tudo' ? 'active' : ''}`;
-    btnAll.innerText = 'Tudo';
-    btnAll.onclick = () => { currentCategory = 'Tudo'; renderAll(); };
-    folderPills.appendChild(btnAll);
+    const currentMonthBills = state.contas.filter(c => {
+        const d = new Date(c.data);
+        return d.getMonth() === month && d.getFullYear() === year;
+    });
 
-    categories.forEach(cat => {
+    const pending = currentMonthBills.filter(c => !c.paga).reduce((acc, c) => acc + parseFloat(c.valor), 0);
+    const paid = currentMonthBills.filter(c => c.paga).reduce((acc, c) => acc + parseFloat(c.valor), 0);
+
+    dom.totalPending.innerText = formatCurrency(pending);
+    dom.totalPaid.innerText = formatCurrency(paid);
+    dom.totalBalance.innerText = formatCurrency(pending + paid);
+}
+
+function renderFilters() {
+    dom.memberFilters.innerHTML = '';
+
+    const pills = ['Tudo', ...state.membros];
+    pills.forEach(m => {
         const btn = document.createElement('button');
-        btn.className = `pill ${currentCategory === cat.nome ? 'active' : ''}`;
-        btn.innerText = cat.nome;
-        btn.onclick = () => { currentCategory = cat.nome; renderAll(); };
-        folderPills.appendChild(btn);
+        btn.className = `pill ${state.filters.membro === m ? 'active' : ''}`;
+        btn.innerText = m;
+        btn.onclick = () => {
+            state.filters.membro = m;
+            state.filters.dia = null;
+            saveData();
+        };
+        dom.memberFilters.appendChild(btn);
     });
 }
 
 function renderBills() {
-    billsList.innerHTML = '';
-    let totalPendente = 0;
+    dom.pendingList.innerHTML = '';
+    dom.paidList.innerHTML = '';
 
-    const filtered = currentCategory === 'Tudo'
-        ? accounts
-        : accounts.filter(acc => acc.categoria === currentCategory);
+    const month = state.viewDate.getMonth();
+    const year = state.viewDate.getFullYear();
 
-    if (filtered.length === 0) {
-        billsList.innerHTML = `
-            <div style="text-align: center; padding: 40px; opacity: 0.5;">
-                <p>Nenhuma conta pendente aqui. ✨</p>
-            </div>
-        `;
-        totalAmountText.innerText = 'R$ 0,00';
-        return;
-    }
-
-    filtered.forEach(bill => {
-        if (bill.status === 'pendente') {
-            totalPendente += parseFloat(bill.valor);
-        }
-
-        const card = document.createElement('div');
-        card.className = `bill-card ${bill.status === 'pago' ? 'paid' : ''}`;
-        card.innerHTML = `
-            <div class="bill-info">
-                <span class="category-tag">${bill.categoria}</span>
-                <h4>${bill.nome_conta}</h4>
-                <p>Vence em: ${formatDate(bill.data_vencimento)}</p>
-                <p class="value">R$ ${parseFloat(bill.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-            </div>
-            <div class="bill-action">
-                ${bill.status === 'pendente'
-                ? `<button class="btn-pay" onclick="markAsPaid(${bill.id})">Pagar</button>`
-                : `<span class="btn-pay paid">✓ Pago</span>`
-            }
-            </div>
-        `;
-        billsList.appendChild(card);
+    const filtered = state.contas.filter(c => {
+        const d = new Date(c.data);
+        const matchMonth = d.getMonth() === month && d.getFullYear() === year;
+        const matchMembro = state.filters.membro === 'Tudo' || c.membro === state.filters.membro;
+        const matchDia = !state.filters.dia || d.getDate() === state.filters.dia;
+        return matchMonth && matchMembro && matchDia;
     });
 
-    totalAmountText.innerText = `R$ ${totalPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    let countPaid = 0;
+
+    filtered.forEach(c => {
+        const bank = state.bancos.find(b => b.nome === c.banco) || { cor: '#ccc' };
+        const card = document.createElement('div');
+        card.className = `bill-card ${c.paga ? 'paid' : ''}`;
+        card.innerHTML = `
+            <div class="card-left">
+                <div class="tag-row">
+                    <span class="tag" style="background:${bank.cor}">${c.banco}</span>
+                    <span class="tag tag-member">${c.membro}</span>
+                </div>
+                <span class="card-title">${c.titulo}</span>
+                <span class="card-date">Vence dia ${new Date(c.data).getUTCDate()}</span>
+            </div>
+            <div class="card-right">
+                <p class="card-value">${formatCurrency(c.valor)}</p>
+                ${!c.paga ? `<button class="btn-check" onclick="togglePago(${c.id})">✓</button>` : '✓'}
+                <button class="btn-del" onclick="deleteConta(${c.id})" style="margin-left:8px; font-size:10px; opacity:0.5">EXCLUIR</button>
+            </div>
+        `;
+
+        if (c.paga) {
+            dom.paidList.appendChild(card);
+            countPaid++;
+        } else {
+            dom.pendingList.appendChild(card);
+        }
+    });
+
+    dom.paidCount.innerText = countPaid;
+    if (dom.pendingList.innerHTML === '') dom.pendingList.innerHTML = '<p style="text-align:center; opacity:0.3; padding:20px;">Nada pendente ✨</p>';
 }
+
+function renderCalendar() {
+    dom.calendarBody.innerHTML = '';
+    const year = state.viewDate.getFullYear();
+    const month = state.viewDate.getMonth();
+
+    dom.calMonthTitle.innerText = dom.displayMonth.innerText + " " + year;
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+        dom.calendarBody.appendChild(document.createElement('div'));
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = `cal-day ${state.filters.dia === d ? 'selected' : ''}`;
+        dayDiv.innerText = d;
+
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const dayBills = state.contas.filter(c => {
+            const billDate = new Date(c.data);
+            return billDate.getUTCDate() === d && billDate.getUTCMonth() === month && billDate.getUTCFullYear() === year;
+        });
+
+        if (dayBills.length > 0) {
+            const dotsDiv = document.createElement('div');
+            dotsDiv.className = 'day-dots';
+            dayBills.slice(0, 3).forEach(b => {
+                const bank = state.bancos.find(bnk => bnk.nome === b.banco) || { cor: '#ccc' };
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.style.background = bank.cor;
+                dotsDiv.appendChild(dot);
+            });
+            dayDiv.appendChild(dotsDiv);
+        }
+
+        if (d === new Date().getDate() && month === new Date().getMonth()) dayDiv.classList.add('today');
+
+        dayDiv.onclick = () => {
+            state.filters.dia = (state.filters.dia === d) ? null : d;
+            closeModals();
+            saveData();
+        };
+        dom.calendarBody.appendChild(dayDiv);
+    }
+}
+
+// --- AÇÕES ---
+function togglePago(id) {
+    const idx = state.contas.findIndex(c => c.id === id);
+    if (idx !== -1) {
+        state.contas[idx].paga = !state.contas[idx].paga;
+        saveData();
+    }
+}
+
+function deleteConta(id) {
+    if (confirm('Excluir esta conta?')) {
+        state.contas = state.contas.filter(c => c.id !== id);
+        saveData();
+    }
+}
+
+// --- MODAIS ---
+function closeModals() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+}
+
+document.querySelectorAll('.close-modal').forEach(b => b.onclick = closeModals);
+
+document.getElementById('open-calendar').onclick = () => document.getElementById('modal-calendar').style.display = 'flex';
+document.getElementById('manage-settings').onclick = () => document.getElementById('modal-settings').style.display = 'flex';
+document.getElementById('add-bill').onclick = () => document.getElementById('modal-bill').style.display = 'flex';
+
+// --- FORMULÁRIOS ---
+document.getElementById('bill-form').onsubmit = (e) => {
+    e.preventDefault();
+    const n = {
+        id: Date.now(),
+        titulo: document.getElementById('bill-title').value,
+        valor: document.getElementById('bill-value').value,
+        data: document.getElementById('bill-date').value,
+        membro: document.getElementById('bill-member').value,
+        banco: document.getElementById('bill-bank').value,
+        paga: false
+    };
+    state.contas.push(n);
+    e.target.reset();
+    closeModals();
+    saveData();
+};
 
 function updateSelectors() {
-    categorySelect.innerHTML = '';
-    categories.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat.id;
-        opt.innerText = cat.nome;
-        categorySelect.appendChild(opt);
+    const memS = document.getElementById('bill-member');
+    const bnkS = document.getElementById('bill-bank');
+    memS.innerHTML = '';
+    bnkS.innerHTML = '';
+    state.membros.forEach(m => memS.innerHTML += `<option value="${m}">${m}</option>`);
+    state.bancos.forEach(b => bnkS.innerHTML += `<option value="${b.nome}">${b.nome}</option>`);
+}
+
+// --- CONFIGURAÇÕES ---
+function renderSettings() {
+    const lM = document.getElementById('list-members');
+    const lB = document.getElementById('list-banks');
+    lM.innerHTML = '';
+    lB.innerHTML = '';
+
+    state.membros.forEach(m => {
+        const d = document.createElement('div');
+        d.className = 'tag-item';
+        d.innerHTML = `${m} <button class="btn-del" onclick="deleteTag('${m}', 'membro')">×</button>`;
+        lM.appendChild(d);
+    });
+
+    state.bancos.forEach(b => {
+        const d = document.createElement('div');
+        d.className = 'tag-item';
+        d.innerHTML = `<span style="color:${b.cor}">●</span> ${b.nome} <button class="btn-del" onclick="deleteTag('${b.nome}', 'banco')">×</button>`;
+        lB.appendChild(d);
     });
 }
 
-function renderFolderManager() {
-    folderListManager.innerHTML = '';
-    categories.forEach(cat => {
-        const item = document.createElement('div');
-        item.className = 'folder-item';
-        item.innerHTML = `
-            <span>${cat.nome}</span>
-            <button class="btn-delete-folder" onclick="deleteFolder(${cat.id})">×</button>
-        `;
-        folderListManager.appendChild(item);
-    });
-}
-
-// 4. AÇÕES (FETCH POST/PATCH)
-async function markAsPaid(id) {
-    try {
-        const res = await fetch(`${API_BASE}/contas/${id}/pagar`, { method: 'PATCH' });
-        if (!res.ok) {
-            const errorText = await res.text();
-            console.error('Erro do servidor (Raw):', errorText);
-            throw new Error('Falha ao atualizar status');
-        }
-        atualizarDados();
-    } catch (e) {
-        console.error(e);
-        alert('Erro ao processar pagamento');
+function deleteTag(name, type) {
+    if (confirm(`Remover ${name}?`)) {
+        if (type === 'membro') state.membros = state.membros.filter(m => m !== name);
+        else state.bancos = state.bancos.filter(b => b.nome !== name);
+        saveData();
     }
 }
 
-async function deleteFolder(id) {
-    if (confirm('Deseja excluir esta pasta?')) {
-        try {
-            const res = await fetch(`${API_BASE}/membros/${id}`, { method: 'DELETE' });
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('Erro do servidor (Raw):', errorText);
-                throw new Error('Falha ao excluir');
-            }
-            atualizarDados();
-        } catch (e) {
-            console.error(e);
-            alert('Erro ao excluir pasta');
-        }
+document.getElementById('btn-add-member').onclick = () => {
+    const val = document.getElementById('new-member').value.trim();
+    if (val) {
+        state.membros.push(val);
+        document.getElementById('new-member').value = '';
+        saveData();
     }
-}
+};
 
-async function addBill(event) {
-    event.preventDefault();
-    const data = {
-        nome_conta: document.getElementById('nome_conta').value,
-        membro_id: document.getElementById('categoria_conta').value,
-        valor: document.getElementById('valor').value,
-        data_vencimento: document.getElementById('data_vencimento').value
-    };
-
-    try {
-        const res = await fetch(`${API_BASE}/contas`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-
-        if (!res.ok) {
-            const errorText = await res.text();
-            console.error('Erro do servidor (Raw):', errorText);
-            throw new Error();
-        }
-
-        billForm.reset();
-        modalBill.style.display = 'none';
-        atualizarDados();
-    } catch (e) {
-        alert('Erro ao adicionar conta. Verifique o console (F12) para detalhes.');
+document.getElementById('btn-add-bank').onclick = () => {
+    const nome = document.getElementById('new-bank').value.trim();
+    const cor = document.getElementById('bank-color').value;
+    if (nome) {
+        state.bancos.push({ nome, cor });
+        document.getElementById('new-bank').value = '';
+        saveData();
     }
+};
+
+// --- NAVEGAÇÃO ---
+document.getElementById('prev-month').onclick = () => {
+    state.viewDate.setMonth(state.viewDate.getMonth() - 1);
+    state.filters.dia = null;
+    saveData();
+};
+
+document.getElementById('next-month').onclick = () => {
+    state.viewDate.setMonth(state.viewDate.getMonth() + 1);
+    state.filters.dia = null;
+    saveData();
+};
+
+// --- AUXILIARES ---
+function formatCurrency(v) {
+    return `R$ ${parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
 }
 
-async function addFolder(event) {
-    event.preventDefault();
-    const nomeInput = document.getElementById('new_folder_name');
-    const nome = nomeInput.value.trim();
-    if (!nome) return;
-
-    try {
-        const res = await fetch(`${API_BASE}/membros`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nome })
-        });
-
-        if (!res.ok) {
-            // Se falhar, tenta ler como texto puros para depuração
-            const errorRaw = await res.text();
-            console.error('DEBUG: Resposta bruta do servidor:', errorRaw);
-
-            try {
-                const errorJSON = JSON.parse(errorRaw);
-                throw new Error(errorJSON.error || 'Erro no servidor');
-            } catch (jsonErr) {
-                throw new Error('O servidor não enviou um JSON válido. Veja o Console (F12).');
-            }
-        }
-
-        nomeInput.value = '';
-        atualizarDados();
-    } catch (e) {
-        console.error('Erro completo:', e);
-        alert(`Erro ao criar pasta: ${e.message}`);
-    }
-}
-
-// 5. AUXILIARES E EVENTOS
-function formatDate(dateStr) {
-    const d = new Date(dateStr);
-    return `${d.getUTCDate()}/${d.getUTCMonth() + 1}/${d.getUTCFullYear()}`;
-}
-
-openModalBtn.onclick = () => modalBill.style.display = 'flex';
-openFolderModalBtn.onclick = () => modalFolder.style.display = 'flex';
-document.querySelectorAll('.close-btn').forEach(btn => btn.onclick = () => {
-    modalBill.style.display = 'none';
-    modalFolder.style.display = 'none';
-});
-
-billForm.onsubmit = addBill;
-folderForm.onsubmit = addFolder;
-
-// Iniciar app
-atualizarDados();
-setInterval(atualizarDados, 10000); // 10s para poupar servidor na nuvem
+// --- INIT ---
+loadData();

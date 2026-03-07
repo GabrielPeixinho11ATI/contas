@@ -1,89 +1,171 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizador de Contas - Família</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Finanças Pro - Organizador Familiar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="app-container">
-        <header>
-            <div class="header-top">
-                <h1>Finanças</h1>
-                <button id="manage-folders" class="btn-config">⚙️ Pastas</button>
-            </div>
-            <div class="total-card">
-                <span>Total Pendente</span>
-                <h2 id="total-amount">R$ 0,00</h2>
-            </div>
+        <!-- Topo com Navegação e Dark Mode -->
+        <header class="app-header">
+            <nav class="month-selector">
+                <button id="prev-month" class="nav-btn">&lt;</button>
+                <div class="current-month">
+                    <span id="display-month">Março</span>
+                    <span id="display-year">2026</span>
+                </div>
+                <button id="next-month" class="nav-btn">&gt;</button>
+            </nav>
+            <button id="theme-toggle" class="theme-btn" title="Alternar Tema">
+                <span class="icon-light">☀️</span>
+                <span class="icon-dark">🌙</span>
+            </button>
         </header>
 
-        <section class="nav-section">
-            <div class="folder-pills" id="folder-pills">
-                <!-- Pílulas serão renderizadas aqui -->
+        <!-- Dashboard Financeiro -->
+        <section class="dashboard">
+            <div class="stat-main">
+                <p>Total Pendente</p>
+                <h2 id="total-pending">R$ 0,00</h2>
+            </div>
+            <div class="stat-row">
+                <div class="stat-item">
+                    <span>Pago</span>
+                    <p id="total-paid">R$ 0,00</p>
+                </div>
+                <div class="stat-item">
+                    <span>Saldo</span>
+                    <p id="total-balance">R$ 0,00</p>
+                </div>
             </div>
         </section>
 
-        <section>
-            <div class="bills-list" id="bills-list">
-                <!-- Cards serão renderizados aqui -->
-            </div>
+        <!-- Ações e Filtros -->
+        <section class="quick-actions">
+            <button id="open-calendar" class="action-btn">
+                <span class="icon">📅</span> Calendário
+            </button>
+            <button id="manage-settings" class="action-btn">
+                <span class="icon">⚙️</span> Ajustes
+            </button>
         </section>
 
-        <button class="fab" id="open-modal">+</button>
+        <!-- Lista de Pendências -->
+        <main class="main-content">
+            <div class="section-title">
+                <h3>Contas Pendentes</h3>
+                <div class="pills-scroll" id="member-filters">
+                    <!-- Filtros de membros via JS -->
+                </div>
+            </div>
+
+            <div id="pending-list" class="bill-grid">
+                <!-- Contas pendentes -->
+            </div>
+
+            <!-- Histórico de Pagos -->
+            <details class="history-section">
+                <summary>Histórico de Pagos (<span id="paid-count">0</span>)</summary>
+                <div id="paid-list" class="bill-grid">
+                    <!-- Contas pagas -->
+                </div>
+            </details>
+        </main>
+
+        <!-- FAB: Adicionar -->
+        <button id="add-bill" class="fab">+</button>
     </div>
 
-    <!-- Modal de Cadastro de Conta -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal-content">
+    <!-- MODAL: NOVA CONTA -->
+    <div id="modal-bill" class="modal-overlay">
+        <div class="modal-card">
             <div class="modal-header">
                 <h2>Nova Conta</h2>
-                <button class="close-btn">&times;</button>
+                <button class="close-modal">&times;</button>
             </div>
             <form id="bill-form">
-                <div class="form-group">
-                    <label>Nome da Conta</label>
-                    <input type="text" id="nome_conta" placeholder="Ex: Internet" required>
+                <div class="input-group">
+                    <label>O que você pagou?</label>
+                    <input type="text" id="bill-title" placeholder="Ex: Internet, Aluguel..." required>
                 </div>
-                <div class="form-group">
-                    <label>Pasta / Membro</label>
-                    <select id="categoria_conta" required>
-                        <!-- Options via JS -->
-                    </select>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" id="bill-value" step="0.01" placeholder="0,00" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Data</label>
+                        <input type="date" id="bill-date" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Valor (R$)</label>
-                    <input type="number" id="valor" step="0.01" placeholder="0.00" required>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Quem?</label>
+                        <select id="bill-member" required></select>
+                    </div>
+                    <div class="input-group">
+                        <label>Banco</label>
+                        <select id="bill-bank" required></select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Data de Vencimento</label>
-                    <input type="date" id="data_vencimento" required>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Adicionar Conta</button>
-                </div>
+                <button type="submit" class="btn-submit">Criar Conta</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal de Gestão de Pastas -->
-    <div class="modal-overlay" id="modal-folders">
-        <div class="modal-content">
+    <!-- MODAL: CALENDÁRIO -->
+    <div id="modal-calendar" class="modal-overlay">
+        <div class="modal-card calendar-card">
             <div class="modal-header">
-                <h2>Gerir Pastas</h2>
-                <button class="close-btn">&times;</button>
+                <h2 id="cal-month-title">Março 2026</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="calendar-wrapper">
+                <div class="cal-days-head">
+                    <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+                </div>
+                <div id="calendar-body" class="cal-grid">
+                    <!-- Dias via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: AJUSTES (Membros e Bancos Coloridos) -->
+    <div id="modal-settings" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Configurações</h2>
+                <button class="close-modal">&times;</button>
             </div>
 
-            <form id="folder-form" class="folder-add-form">
-                <input type="text" id="new_folder_name" placeholder="Nome da pasta (Ex: Gabriel)" required>
-                <button type="submit" class="btn-add-mini">+</button>
-            </form>
+            <div class="settings-scroll">
+                <section class="set-section">
+                    <h3>Membros da Família</h3>
+                    <div class="add-box">
+                        <input type="text" id="new-member" placeholder="Nome...">
+                        <button id="btn-add-member">+</button>
+                    </div>
+                    <div id="list-members" class="tag-cloud"></div>
+                </section>
 
-            <div class="folder-list-manager" id="folder-list-manager">
-                <!-- Lista de pastas para excluir -->
+                <section class="set-section">
+                    <h3>Bancos e Cores</h3>
+                    <div class="add-box">
+                        <input type="text" id="new-bank" placeholder="Nome do Banco...">
+                        <input type="color" id="bank-color" value="#60a5fa">
+                        <button id="btn-add-bank">+</button>
+                    </div>
+                    <div id="list-banks" class="tag-cloud"></div>
+                </section>
             </div>
         </div>
     </div>
