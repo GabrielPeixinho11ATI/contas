@@ -4,94 +4,760 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bill Organizer V10 - Evolution</title>
+    <title>Bill Organizer Pro V14</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 
+            BILL ORGANIZER V14 - FINAL PREMIUM BUILD
+            Integrated Architecture | Mobile-First | Responsive Desktop Grid
+        */
+        :root {
+            --bg: #121212;
+            --card: #1E1E1E;
+            --border: #333333;
+            --text: #F5F5F5;
+            --text-dim: #9E9E9E;
+            --accent: #BB86FC;
+            --success: #03DAC6;
+            --radius-xl: 32px;
+            --radius-lg: 18px;
+            --sidebar-w: 300px;
+            --calendar-w: 350px;
+        }
+
+        [data-theme="light"] {
+            --bg: #F8F9FA;
+            --card: #FFFFFF;
+            --border: #E9ECEF;
+            --text: #212529;
+            --text-dim: #6C757D;
+            --accent: #6200EE;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            transition: color 0.3s, background 0.3s;
+        }
+
+        /* === APP SCAFFOLD === */
+        .app-layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .desktop-sidebar,
+        .desktop-calendar-pane {
+            display: none;
+        }
+
+        .main-scaffold {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            padding-bottom: 120px;
+        }
+
+        /* Header Mobile */
+        .mobile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 100;
+            border-bottom: 1px solid transparent;
+        }
+
+        .m-nav-left {
+            display: flex;
+            gap: 10px;
+        }
+
+        .m-nav-center {
+            text-align: center;
+        }
+
+        .icon-m {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            color: var(--text);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            font-size: 1.1rem;
+        }
+
+        /* HERO Dashboard */
+        .mobile-hero {
+            padding: 0 20px 20px;
+        }
+
+        .hero-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-card p {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .hero-card h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .hero-footer {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .paid-val-display {
+            color: var(--success);
+            font-weight: 800;
+        }
+
+        /* Internal Navigation */
+        .mobile-action-bar {
+            display: flex;
+            gap: 12px;
+            padding: 0 20px 20px;
+        }
+
+        .m-sec-btn {
+            flex: 1;
+            padding: 14px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        /* Feed & Bills */
+        .feed-area {
+            padding: 0 20px;
+        }
+
+        .feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .stack-layout {
+            display: grid;
+            gap: 12px;
+        }
+
+        .bill-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .bill-card:active {
+            scale: 0.98;
+        }
+
+        .b-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .b-tags {
+            display: flex;
+            gap: 6px;
+        }
+
+        .tag-s {
+            font-size: 0.6rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: white;
+        }
+
+        .tag-mem {
+            background: var(--border);
+            color: var(--text-dim);
+        }
+
+        .b-name {
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .b-meta {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .b-action {
+            text-align: right;
+        }
+
+        .b-price {
+            font-weight: 900;
+            font-size: 1.15rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        /* Buttons inside Card */
+        .action-tray {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .pay-btn {
+            background: var(--success);
+            color: var(--bg);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background: none;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 0.6rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .del-btn {
+            border: none;
+            background: none;
+            color: #ff5252;
+            font-size: 0.7rem;
+            opacity: 0.3;
+            cursor: pointer;
+        }
+
+        .faded {
+            opacity: 0.4;
+            filter: grayscale(1);
+        }
+
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px dashed var(--border);
+            padding-top: 20px;
+        }
+
+        .history-section summary {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 10px;
+            list-style: none;
+            text-align: center;
+        }
+
+        /* Floating Button Mobile */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 65px;
+            height: 65px;
+            background: var(--accent);
+            color: var(--bg);
+            border-radius: 50%;
+            font-size: 2.2rem;
+            font-weight: 800;
+            border: none;
+            box-shadow: 0 15px 35px rgba(187, 134, 252, 0.4);
+            z-index: 1000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateZ(0);
+        }
+
+        /* === DESKTOP LAYOUT === */
+        @media (min-width: 1024px) {
+            .app-layout {
+                display: grid;
+                grid-template-columns: var(--sidebar-w) 1fr var(--calendar-w);
+                height: 100vh;
+            }
+
+            /* Sidebar PC */
+            .desktop-sidebar {
+                display: flex;
+                flex-direction: column;
+                background: var(--card);
+                border-right: 1px solid var(--border);
+                padding: 40px 30px;
+            }
+
+            .sidebar-header {
+                margin-bottom: 30px;
+            }
+
+            .sidebar-header h2 {
+                font-size: 1.3rem;
+                font-weight: 900;
+            }
+
+            .v-tag {
+                font-size: 0.6rem;
+                background: var(--accent);
+                color: var(--bg);
+                padding: 2px 8px;
+                border-radius: 6px;
+                position: relative;
+                top: -5px;
+            }
+
+            /* CTA Button PC (USER REQUEST: HIGH VISIBILITY) */
+            .sidebar-cta-btn {
+                width: 100%;
+                padding: 18px;
+                background: var(--accent);
+                color: var(--bg);
+                border: none;
+                border-radius: 16px;
+                font-size: 1rem;
+                font-weight: 800;
+                cursor: pointer;
+                margin-bottom: 35px;
+                box-shadow: 0 10px 25px rgba(187, 134, 252, 0.3);
+                transition: 0.3s;
+                display: block;
+            }
+
+            .sidebar-cta-btn:hover {
+                scale: 1.02;
+                filter: brightness(1.1);
+            }
+
+            .s-hero-card {
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-lg);
+                padding: 25px;
+                margin-bottom: 35px;
+            }
+
+            .s-hero-card p {
+                font-size: 0.65rem;
+                font-weight: 800;
+                color: var(--text-dim);
+                text-transform: uppercase;
+                margin-bottom: 8px;
+            }
+
+            .s-hero-card h1 {
+                font-size: 2rem;
+                font-weight: 900;
+                letter-spacing: -1px;
+            }
+
+            .sidebar-nav {
+                flex: 1;
+            }
+
+            .sidebar-nav h3 {
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                color: var(--text-dim);
+                letter-spacing: 2px;
+                margin-bottom: 20px;
+                font-weight: 800;
+            }
+
+            .sidebar-pills {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .pill {
+                padding: 14px 18px;
+                border-radius: 12px;
+                background: transparent;
+                border: 1px solid transparent;
+                color: var(--text-dim);
+                font-size: 0.9rem;
+                font-weight: 700;
+                text-align: left;
+                cursor: pointer;
+            }
+
+            .pill.active {
+                background: var(--bg);
+                border-color: var(--border);
+                color: var(--text);
+            }
+
+            .sidebar-footer {
+                margin-top: auto;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .icon-btn-pc {
+                flex: 1;
+                padding: 12px;
+                border-radius: 12px;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                color: var(--text);
+                cursor: pointer;
+                font-size: 1rem;
+                display: grid;
+                place-items: center;
+            }
+
+            /* Main Center PC */
+            .main-scaffold {
+                max-width: none;
+                margin: 0;
+                padding: 40px 60px;
+                overflow-y: auto;
+            }
+
+            .mobile-header,
+            .mobile-hero,
+            .mobile-action-bar,
+            .fab {
+                display: none;
+            }
+
+            .feed-header h2 {
+                font-size: 1.8rem;
+                font-weight: 900;
+            }
+
+            /* Right Calendar PC */
+            .desktop-calendar-pane {
+                display: flex;
+                flex-direction: column;
+                background: var(--card);
+                border-left: 1px solid var(--border);
+                padding: 40px 30px;
+            }
+
+            .fixed-cal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+
+            .cal-nav-btn {
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                width: 40px;
+                height: 40px;
+                color: var(--text);
+                cursor: pointer;
+                font-size: 1.2rem;
+            }
+
+            .fixed-cal-header h3 {
+                font-size: 1.1rem;
+                font-weight: 800;
+            }
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 440px;
+            padding: 40px;
+        }
+
+        .modal-card.scrollable {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .m-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 2rem;
+            cursor: pointer;
+            opacity: 0.5;
+        }
+
+        /* Calendar Grid */
+        .week-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .day-cell.active-sel {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .day-cell.today-is {
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+
+        .day-markers {
+            display: flex;
+            gap: 2px;
+            position: absolute;
+            bottom: 5px;
+        }
+
+        .dot-sm {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        /* Forms Utility */
+        .f-group {
+            margin-bottom: 20px;
+        }
+
+        .f-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 900;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: var(--text);
+            outline: none;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+        }
+
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .tag-pill {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
 </head>
 
 <body>
     <div class="app-layout">
 
-        <!-- Sidebar (Visible only on Desktop) -->
+        <!-- SIDEBAR (PC Only) -->
         <aside class="desktop-sidebar">
             <div class="sidebar-header">
-                <h2><span class="app-name-display">Bills Pro</span> <span class="v-tag">V11</span></h2>
-                <div class="backup-actions">
-                    <button class="export-btn-mini" id="export-pc" title="Exportar Backup">📥</button>
-                    <button class="import-btn-mini" id="import-trigger-pc" title="Restaurar Backup">📤</button>
-                </div>
+                <h2><span class="app-name-display">Bills Pro</span> <span class="v-tag">V14</span></h2>
             </div>
+
+            <!-- PRIMARY ADD BUTTON ON PC -->
+            <button id="pc-add-bill-btn" class="sidebar-cta-btn">+ Adicionar Conta</button>
 
             <div class="sidebar-stats">
                 <div class="s-hero-card">
-                    <p>Total Pendente</p>
+                    <p>Pendente</p>
                     <h1 class="pending-val-display">R$ 0,00</h1>
                     <div class="s-footer">Pago: <span class="paid-val-display">R$ 0,00</span></div>
                 </div>
             </div>
 
             <nav class="sidebar-nav">
-                <h3>Membros</h3>
+                <h3>Categorias</h3>
                 <div id="pc-member-filters" class="sidebar-pills"></div>
-                <button id="pc-open-settings" class="sidebar-action-btn">⚙️ Configurações</button>
             </nav>
+
+            <div class="sidebar-footer">
+                <button id="pc-open-settings" class="icon-btn-pc" title="Configurações">⚙️</button>
+                <button id="export-pc" class="icon-btn-pc" title="Backup">📥</button>
+                <button id="import-trigger-pc" class="icon-btn-pc" title="Restaurar">📤</button>
+                <input type="file" id="import-file" style="display:none;" accept=".json">
+            </div>
         </aside>
 
-        <!-- Main Content (Mobile + Desktop) -->
+        <!-- MAIN VIEW -->
         <div class="main-scaffold">
 
-            <!-- Mobile Top Nav -->
             <header class="mobile-header">
                 <div class="m-nav-left">
-                    <button id="export-m" class="icon-m">📥</button>
-                    <button id="import-trigger-m" class="icon-m">📤</button>
-                    <input type="file" id="import-file" style="display: none;" accept=".json">
+                    <button id="theme-toggle" class="icon-m">☀️</button>
                 </div>
                 <div class="m-nav-center">
-                    <span class="app-name-display" style="font-weight:800; display:block;">Bills Pro V11</span>
-                    <span id="label-month">Março</span>
-                    <span id="label-year">2026</span>
+                    <span class="app-name-display"
+                        style="font-weight:900; display:block; font-size:1.1rem; line-height:1;">Bills Pro V14</span>
+                    <span id="label-month-m"
+                        style="font-size:0.7rem; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:1px;">Março
+                        2026</span>
                 </div>
                 <div class="m-nav-right">
-                    <button id="theme-toggle" class="icon-m">☀️</button>
+                    <div style="display:flex; gap:8px;">
+                        <button id="export-m" class="icon-m" title="Backup">📥</button>
+                        <button id="import-trigger-m" class="icon-m" title="Importar">📤</button>
+                    </div>
                 </div>
             </header>
 
-            <!-- Mobile Dashboard (Hidden on Desktop Sidebar view logically) -->
             <section class="mobile-hero">
                 <div class="hero-card">
                     <p>Total Pendente</p>
                     <h1 class="pending-val-display">R$ 0,00</h1>
-                    <div class="hero-footer">Pago: <span class="paid-val-display">R$ 0,00</span></div>
+                    <div class="hero-footer">Total Pago: <span class="paid-val-display">R$ 0,00</span></div>
                 </div>
             </section>
 
-            <!-- Action Bar (Mobile only for Calendar toggle) -->
             <div class="mobile-action-bar">
-                <button id="m-btn-open-cal" class="m-sec-btn">📅 Ver Calendário</button>
+                <button id="m-btn-open-cal" class="m-sec-btn">📅 Calendário</button>
                 <button id="m-btn-open-settings" class="m-sec-btn">⚙️ Ajustes</button>
             </div>
 
-            <!-- Global Content Feed -->
             <main class="feed-area">
                 <div class="feed-header">
-                    <h2>Contas do Mês</h2>
-                    <div id="filter-pills-m" class="m-pills-scroll"></div>
+                    <h2>Gestão de Contas</h2>
                 </div>
-
                 <div id="pending-stack" class="stack-layout"></div>
 
                 <details class="history-section" open>
-                    <summary>Resolvidas (<span id="paid-count">0</span>)</summary>
+                    <summary>Mostrando Histórico (<span id="paid-count">0</span>)</summary>
                     <div id="paid-stack" class="stack-layout faded"></div>
                 </details>
             </main>
         </div>
 
-        <!-- Right Side: Calendar (Visible only on Desktop) -->
+        <!-- CALENDAR PANE (PC Only) -->
         <aside class="desktop-calendar-pane">
             <div class="fixed-cal-header">
                 <button id="cal-prev" class="cal-nav-btn">‹</button>
@@ -100,24 +766,21 @@
             </div>
             <div class="fixed-cal-body">
                 <div class="week-days">
-                    <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+                    <span>DOM</span><span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SAB</span>
                 </div>
                 <div id="cal-grid-fixed" class="days-grid"></div>
             </div>
-            <div class="cal-legend">
-                <div class="legend-item"><span class="dot-example"></span> Dias com vencimento</div>
-            </div>
         </aside>
 
-        <!-- Floating Button (Mobile Only) -->
+        <!-- MOBILE FAB -->
         <button id="fab-add" class="fab">+</button>
     </div>
 
-    <!-- MODAL: CALENDÁRIO (Mobile Only) -->
+    <!-- MODAL: CALENDAR (Mobile) -->
     <div id="modal-cal" class="modal-overlay">
         <div class="modal-card">
             <div class="m-modal-header">
-                <div class="m-cal-nav">
+                <div style="display:flex; align-items:center; gap:20px;">
                     <button id="m-cal-prev" class="cal-nav-btn">‹</button>
                     <h2 id="cal-label-modal">Março 2026</h2>
                     <button id="m-cal-next" class="cal-nav-btn">›</button>
@@ -126,14 +789,14 @@
             </div>
             <div class="modal-cal-body">
                 <div class="week-days">
-                    <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+                    <span>DOM</span><span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SAB</span>
                 </div>
                 <div id="cal-grid-modal" class="days-grid"></div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: FORMULÁRIO -->
+    <!-- MODAL: FORM (Add/Edit) -->
     <div id="modal-form" class="modal-overlay">
         <div class="modal-card">
             <div class="m-modal-header">
@@ -143,8 +806,8 @@
             <form id="bill-form">
                 <input type="hidden" id="editing-id" value="">
                 <div class="f-group">
-                    <label>Descrição</label>
-                    <input type="text" id="in-title" placeholder="..." required>
+                    <label>Título da Conta</label>
+                    <input type="text" id="in-title" placeholder="Internet, Aluguel, etc." required>
                 </div>
                 <div class="f-row">
                     <div class="f-group">
@@ -152,21 +815,21 @@
                         <input type="number" id="in-value" step="0.01" required>
                     </div>
                     <div class="f-group">
-                        <label>Data</label>
+                        <label>Vencimento</label>
                         <input type="date" id="in-date" required>
                     </div>
                 </div>
                 <div class="f-row">
                     <div class="f-group">
-                        <label>Membro</label>
+                        <label>Responsável</label>
                         <select id="in-member" required></select>
                     </div>
                     <div class="f-group">
-                        <label>Banco</label>
+                        <label>Banco / Pagamento</label>
                         <select id="in-bank" required></select>
                     </div>
                 </div>
-                <button type="submit" class="btn-cta">Salvar Conta</button>
+                <button type="submit" class="btn-cta">Salvar Alterações</button>
             </form>
         </div>
     </div>
@@ -175,30 +838,390 @@
     <div id="modal-settings" class="modal-overlay">
         <div class="modal-card scrollable">
             <div class="m-modal-header">
-                <h2>Configurações</h2>
+                <h2>Ajustes Premium</h2>
                 <button class="close-modal">×</button>
             </div>
+
             <section class="st-section">
-                <h3>Categorias</h3>
-                <div class="st-add">
-                    <input type="text" id="new-mem" placeholder="Nome...">
-                    <button id="add-mem-btn">+</button>
+                <h3>Personalização</h3>
+                <div class="f-group">
+                    <label>Nome Personalizado do App</label>
+                    <input type="text" id="in-app-name" placeholder="Ex: Organizador Familiar">
+                </div>
+            </section>
+
+            <section class="st-section">
+                <h3>Membros / Pastas</h3>
+                <div class="st-add" style="margin-bottom:15px;">
+                    <input type="text" id="new-mem" placeholder="Adicionar Nome...">
+                    <button id="add-mem-btn" class="icon-m"
+                        style="background:var(--accent); color:var(--bg);">+</button>
                 </div>
                 <div id="set-members-list" class="tag-cloud"></div>
             </section>
-            <section class="st-section">
-                <h3>Bancos & Cores</h3>
-                <div class="st-add">
-                    <input type="text" id="new-bnk" placeholder="Banco...">
-                    <input type="color" id="bnk-color" value="#3b82f6">
-                    <button id="add-bnk-btn">+</button>
+
+            <section class="st-section" style="border:none;">
+                <h3>Bancos & Cores Custom</h3>
+                <div class="st-add" style="margin-bottom:15px;">
+                    <input type="text" id="new-bnk" placeholder="Nome do Banco...">
+                    <input type="color" id="bnk-color" value="#BB86FC"
+                        style="padding:0; height:45px; border:none; background:none;">
+                    <button id="add-bnk-btn" class="icon-m"
+                        style="background:var(--accent); color:var(--bg);">+</button>
                 </div>
                 <div id="set-banks-list" class="tag-cloud"></div>
             </section>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        /**
+         * BILL ORGANIZER V14 - FINAL PREMEDITATED ENGINE
+         * 100% Client-Side | LocalStorage Persistence
+         */
+
+        let state = {
+            appName: "Bills Pro V14",
+            theme: 'dark',
+            members: ["Gabriel", "Casa", "Família"],
+            banks: [
+                { name: "Nubank", color: "#8a05be" },
+                { name: "Itaú", color: "#ec7000" },
+                { name: "Cash", color: "#10B981" }
+            ],
+            bills: [],
+            viewDate: new Date(),
+            filter: { member: 'Tudo', day: null }
+        };
+
+        function loadStore() {
+            const saved = localStorage.getItem('bills_v14_premium');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state = { ...state, ...parsed };
+                state.viewDate = new Date(state.viewDate);
+            }
+            applyTheme();
+            refreshUI();
+        }
+
+        function saveStore() {
+            localStorage.setItem('bills_v14_premium', JSON.stringify(state));
+            refreshUI();
+        }
+
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', state.theme);
+            const mSwitch = document.getElementById('theme-toggle');
+            if (mSwitch) mSwitch.innerText = state.theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // --- BACKUP ---
+        function exportData() {
+            const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_${state.appName.replace(/\s+/g, '_').toLowerCase()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.bills && data.members) {
+                        state = { ...state, ...data };
+                        state.viewDate = new Date();
+                        saveStore();
+                        alert('Dados Restaurados! 🔄');
+                    } else throw new Error();
+                } catch (err) { alert('Arquivo de backup inválido.'); }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- ENGINE RENDER ---
+        const ui = {
+            pendingEls: document.querySelectorAll('.pending-val-display'),
+            paidEls: document.querySelectorAll('.paid-val-display'),
+            labelMonthM: document.getElementById('label-month-m'),
+            labelCalPC: document.getElementById('cal-label-fixed'),
+            labelCalM: document.getElementById('cal-label-modal'),
+            pStack: document.getElementById('pending-stack'),
+            hStack: document.getElementById('paid-stack'),
+            hCount: document.getElementById('paid-count'),
+            pillsPC: document.getElementById('pc-member-filters'),
+            gridFixed: document.getElementById('cal-grid-fixed'),
+            gridModal: document.getElementById('cal-grid-modal')
+        };
+
+        function refreshUI() {
+            const pivot = state.viewDate;
+            const m = pivot.getMonth();
+            const y = pivot.getFullYear();
+            const names = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+            // Branding & Navigation Sinc
+            document.querySelectorAll('.app-name-display').forEach(el => el.innerText = state.appName);
+            document.title = state.appName;
+            const inName = document.getElementById('in-app-name');
+            if (inName && !inName.matches(':focus')) inName.value = state.appName;
+
+            if (ui.labelMonthM) ui.labelMonthM.innerText = `${names[m]} ${y}`;
+            if (ui.labelCalPC) ui.labelCalPC.innerText = `${names[m]} ${y}`;
+            if (ui.labelCalM) ui.labelCalM.innerText = `${names[m]} ${y}`;
+
+            const monthBills = state.bills.filter(b => {
+                const d = new Date(b.date);
+                return d.getUTCMonth() === m && d.getUTCFullYear() === y;
+            });
+
+            const pending = monthBills.filter(b => !b.paid).reduce((acc, b) => acc + parseFloat(b.value), 0);
+            const paid = monthBills.filter(b => b.paid).reduce((acc, b) => acc + parseFloat(b.value), 0);
+            ui.pendingEls.forEach(el => el.innerText = formatBRL(pending));
+            ui.paidEls.forEach(el => el.innerText = formatBRL(paid));
+
+            renderPills();
+            renderLists(monthBills);
+            renderCalendar('fixed');
+            renderCalendar('modal');
+            syncConfig();
+        }
+
+        function renderPills() {
+            if (!ui.pillsPC) return;
+            ui.pillsPC.innerHTML = '';
+            ['Tudo', ...state.members].forEach(m => {
+                const btn = document.createElement('button');
+                btn.className = `pill ${state.filter.member === m ? 'active' : ''}`;
+                btn.innerText = m;
+                btn.onclick = () => { state.filter.member = m; state.filter.day = null; saveStore(); };
+                ui.pillsPC.appendChild(btn);
+            });
+        }
+
+        function renderLists(monthBills) {
+            ui.pStack.innerHTML = ''; ui.hStack.innerHTML = '';
+
+            const filtered = monthBills.filter(b => {
+                const mOk = state.filter.member === 'Tudo' || b.member === state.filter.member;
+                const dOk = !state.filter.day || new Date(b.date).getUTCDate() === state.filter.day;
+                return mOk && dOk;
+            });
+
+            let paidN = 0;
+            filtered.forEach(b => {
+                const bank = state.banks.find(bk => bk.name === b.bank) || { color: '#666' };
+                const card = document.createElement('div');
+                card.className = `bill-card ${b.paid ? 'faded' : ''}`;
+                card.innerHTML = `
+                    <div class="b-info">
+                        <div class="b-tags">
+                            <span class="tag-s" style="background:${bank.color}">${b.bank}</span>
+                            <span class="tag-s tag-mem">${b.member}</span>
+                        </div>
+                        <span class="b-name">${b.title}</span>
+                        <span class="b-meta">Vencimento: Dia ${new Date(b.date).getUTCDate()}</span>
+                    </div>
+                    <div class="b-action">
+                        <span class="b-price">${formatBRL(b.value)}</span>
+                        <div class="action-tray">
+                            ${!b.paid ? `
+                                <button class="edit-btn" onclick="editOffer(${b.id})">EDITAR</button>
+                                <button class="pay-btn" onclick="toggleBill(${b.id})">✓</button>
+                            ` : '✅'}
+                            <button class="del-btn" onclick="delBill(${b.id})">EXCLUIR</button>
+                        </div>
+                    </div>
+                `;
+                if (b.paid) { ui.hStack.appendChild(card); paidN++; }
+                else ui.pStack.appendChild(card);
+            });
+            ui.hCount.innerText = paidN;
+            if (ui.pStack.innerHTML === '') ui.pStack.innerHTML = '<p style="text-align:center; padding:40px; opacity:0.3; font-weight:700;">Zero pendências. Parabéns! ✨</p>';
+        }
+
+        function renderCalendar(type) {
+            const grid = type === 'fixed' ? ui.gridFixed : ui.gridModal;
+            if (!grid) return;
+            grid.innerHTML = '';
+            const y = state.viewDate.getFullYear();
+            const m = state.viewDate.getMonth();
+
+            const first = new Date(y, m, 1).getDay();
+            const last = new Date(y, m + 1, 0).getDate();
+
+            for (let i = 0; i < first; i++) grid.appendChild(document.createElement('div'));
+
+            for (let d = 1; d <= last; d++) {
+                const cell = document.createElement('div');
+                cell.className = `day-cell ${state.filter.day === d ? 'active-sel' : ''}`;
+                cell.innerText = d;
+
+                const dayBills = state.bills.filter(b => {
+                    const date = new Date(b.date);
+                    return date.getUTCDate() === d && date.getUTCMonth() === m && date.getUTCFullYear() === y && !b.paid;
+                });
+
+                if (dayBills.length > 0) {
+                    const dots = document.createElement('div');
+                    dots.className = 'day-markers';
+                    dayBills.slice(0, 3).forEach(b => {
+                        const bnk = state.banks.find(bk => bk.name === b.bank) || { color: '#666' };
+                        const dot = document.createElement('div'); dot.className = 'dot-sm'; dot.style.background = bnk.color;
+                        dots.appendChild(dot);
+                    });
+                    cell.appendChild(dots);
+                }
+
+                if (d === new Date().getDate() && m === new Date().getMonth() && y === new Date().getFullYear()) cell.classList.add('today-is');
+
+                cell.onclick = () => {
+                    state.filter.day = (state.filter.day === d) ? null : d;
+                    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+                    saveStore();
+                };
+                grid.appendChild(cell);
+            }
+        }
+
+        // --- LOGIC ---
+        function toggleBill(id) {
+            const i = state.bills.findIndex(b => b.id === id);
+            if (i !== -1) { state.bills[i].paid = !state.bills[i].paid; saveStore(); }
+        }
+
+        function delBill(id) {
+            if (confirm('Deseja excluir esta conta?')) {
+                state.bills = state.bills.filter(b => b.id !== id);
+                saveStore();
+            }
+        }
+
+        function editOffer(id) {
+            const b = state.bills.find(x => x.id === id);
+            if (!b) return;
+            document.getElementById('modal-title').innerText = "Editar Despesa";
+            document.getElementById('editing-id').value = b.id;
+            document.getElementById('in-title').value = b.title;
+            document.getElementById('in-value').value = b.value;
+            document.getElementById('in-date').value = b.date;
+            document.getElementById('in-member').value = b.member;
+            document.getElementById('in-bank').value = b.bank;
+            document.getElementById('modal-form').style.display = 'flex';
+        }
+
+        function switchTime(dir) {
+            state.viewDate.setMonth(state.viewDate.getMonth() + dir);
+            state.filter.day = null;
+            saveStore();
+        }
+
+        // --- INTERFACE BINDINGS ---
+        document.getElementById('theme-toggle').onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; applyTheme(); saveStore(); };
+        document.getElementById('export-m').onclick = exportData;
+        document.getElementById('export-pc').onclick = exportData;
+        document.getElementById('import-trigger-m').onclick = () => document.getElementById('import-file').click();
+        document.getElementById('import-trigger-pc').onclick = () => document.getElementById('import-file').click();
+        document.getElementById('import-file').onchange = importData;
+
+        document.getElementById('in-app-name').oninput = (e) => {
+            state.appName = e.target.value || "Bills Pro V14";
+            document.querySelectorAll('.app-name-display').forEach(el => el.innerText = state.appName);
+            document.title = state.appName;
+            saveStore();
+        };
+
+        const openSettings = () => document.getElementById('modal-settings').style.display = 'flex';
+        document.getElementById('m-btn-open-settings').onclick = openSettings;
+        document.getElementById('pc-open-settings').onclick = openSettings;
+        document.getElementById('m-btn-open-cal').onclick = () => document.getElementById('modal-cal').style.display = 'flex';
+
+        const openAdd = () => {
+            document.getElementById('modal-title').innerText = "Nova Despesa";
+            document.getElementById('editing-id').value = "";
+            document.getElementById('bill-form').reset();
+            document.getElementById('modal-form').style.display = 'flex';
+        };
+        document.getElementById('fab-add').onclick = openAdd;
+        document.getElementById('pc-add-bill-btn').onclick = openAdd;
+
+        document.querySelectorAll('.close-modal').forEach(b => b.onclick = () => {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+        });
+
+        document.getElementById('cal-prev').onclick = () => switchTime(-1);
+        document.getElementById('cal-next').onclick = () => switchTime(1);
+        document.getElementById('m-cal-prev').onclick = () => switchTime(-1);
+        document.getElementById('m-cal-next').onclick = () => switchTime(1);
+
+        document.getElementById('bill-form').onsubmit = (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editing-id').value;
+            const data = {
+                title: document.getElementById('in-title').value,
+                value: document.getElementById('in-value').value,
+                date: document.getElementById('in-date').value,
+                member: document.getElementById('in-member').value,
+                bank: document.getElementById('in-bank').value
+            };
+
+            if (id) {
+                const i = state.bills.findIndex(x => x.id == id);
+                if (i !== -1) state.bills[i] = { ...state.bills[i], ...data };
+            } else {
+                state.bills.push({ id: Date.now(), ...data, paid: false });
+            }
+            document.getElementById('modal-form').style.display = 'none';
+            saveStore();
+        };
+
+        function syncConfig() {
+            const memS = document.getElementById('in-member'), bnkS = document.getElementById('in-bank');
+            memS.innerHTML = ''; bnkS.innerHTML = '';
+            state.members.forEach(m => memS.innerHTML += `<option value="${m}">${m}</option>`);
+            state.banks.forEach(b => bnkS.innerHTML += `<option value="${b.name}">${b.name}</option>`);
+
+            const memC = document.getElementById('set-members-list'), bnkC = document.getElementById('set-banks-list');
+            memC.innerHTML = ''; bnkC.innerHTML = '';
+            state.members.forEach(m => {
+                const div = document.createElement('div'); div.className = 'tag-pill';
+                div.innerHTML = `<span>${m}</span> <button class="btn-del" onclick="remTag('${m}', 'm')">×</button>`;
+                memC.appendChild(div);
+            });
+            state.banks.forEach(b => {
+                const div = document.createElement('div'); div.className = 'tag-pill';
+                div.innerHTML = `<span style="color:${b.color}; font-size:1.2rem;">●</span> <span>${b.name}</span> <button class="btn-del" onclick="remTag('${b.name}', 'b')">×</button>`;
+                bnkC.appendChild(div);
+            });
+        }
+
+        function remTag(name, type) {
+            if (confirm(`Remover ${name}?`)) {
+                if (type === 'm') state.members = state.members.filter(x => x !== name);
+                else state.banks = state.banks.filter(x => x.name !== name);
+                saveStore();
+            }
+        }
+
+        document.getElementById('add-mem-btn').onclick = () => {
+            const i = document.getElementById('new-mem'); if (i.value) { state.members.push(i.value); i.value = ''; saveStore(); }
+        };
+
+        document.getElementById('add-bnk-btn').onclick = () => {
+            const n = document.getElementById('new-bnk'), c = document.getElementById('bnk-color');
+            if (n.value) { state.banks.push({ name: n.value, color: c.value }); n.value = ''; saveStore(); }
+        };
+
+        function formatBRL(v) { return `R$ ${parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`; }
+
+        loadStore();
+    </script>
 </body>
 
 </html>
