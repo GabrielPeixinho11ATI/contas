@@ -4,25 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bills Pro V8 - Senior UI/UX</title>
+    <title>Bill Organizer V9 - Senior Pro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="app-shell">
-        <!-- Header Minimalista -->
-        <header class="app-header">
-            <div class="header-left">
-                <button id="export-btn" class="icon-btn-subtle" title="Exportar Backup">
+        <!-- Minimalist Header -->
+        <header class="top-nav">
+            <div class="nav-left">
+                <button id="export-json" class="icon-outline" title="Exportar Backup">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
                     </svg>
                 </button>
-                <button id="import-trigger" class="icon-btn-subtle" title="Importar Backup">
+                <button id="import-trigger" class="icon-outline" title="Importar Backup">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
                     </svg>
@@ -30,151 +30,136 @@
                 <input type="file" id="import-file" style="display: none;" accept=".json">
             </div>
 
-            <nav class="month-stepper">
-                <button id="prev-m" class="step-btn">‹</button>
-                <div class="month-display">
-                    <span id="cur-month">Março</span>
-                    <span id="cur-year">2026</span>
-                </div>
-                <button id="next-m" class="step-btn">›</button>
-            </nav>
+            <div class="current-view-label">
+                <span id="label-month">Março</span>
+                <span id="label-year">2026</span>
+            </div>
 
-            <div class="header-right">
-                <button id="theme-btn" class="icon-btn-subtle">
-                    <svg id="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="5" />
-                        <line x1="12" y1="1" x2="12" y2="3" />
-                        <line x1="12" y1="21" x2="12" y2="23" />
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                        <line x1="1" y1="12" x2="3" y2="12" />
-                        <line x1="21" y1="12" x2="23" y2="12" />
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                    </svg>
-                    <svg id="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        style="display:none;">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                    </svg>
-                </button>
+            <div class="nav-right">
+                <button id="theme-toggle" class="icon-outline">🌙</button>
             </div>
         </header>
 
-        <!-- Hero Dashboard -->
-        <section class="hero-stats">
+        <!-- Centered Dashboard -->
+        <section class="hero-dashboard">
             <div class="hero-card">
-                <p class="stat-label">Total Pendente</p>
-                <h1 id="pending-val">R$ 0,00</h1>
-                <div class="stat-meta">
-                    <span class="meta-tag">Pago: <strong id="paid-val">R$ 0,00</strong></span>
+                <p class="hero-subtitle">Total Pendente</p>
+                <h1 id="total-pending-val">R$ 0,00</h1>
+                <div class="hero-footer">
+                    <span>Pago: <strong id="total-paid-val">R$ 0,00</strong></span>
                 </div>
             </div>
         </section>
 
         <!-- Quick Access -->
-        <div class="quick-nav">
-            <button id="open-cal" class="secondary-btn">📅 Calendário</button>
-            <button id="open-settings" class="secondary-btn">⚙️ Ajustes</button>
-        </div>
+        <section class="action-bar">
+            <button id="btn-open-cal" class="secondary-action">📅 Ver Calendário</button>
+            <button id="btn-open-settings" class="secondary-action">⚙️ Ajustes</button>
+        </section>
 
-        <!-- Feed Content -->
-        <main class="main-list">
+        <!-- Main Feed -->
+        <main class="feed-container">
             <div class="feed-header">
-                <h2>Contas a Pagar</h2>
-                <div id="filter-bar" class="pills-scroll"></div>
+                <h2>Suas Contas</h2>
+                <div id="filter-pills" class="scroll-pills"></div>
             </div>
 
-            <div id="pending-stack" class="list-stack"></div>
+            <div id="pending-stack" class="bill-stack"></div>
 
-            <details class="collapsed-section">
-                <summary>Resolvidas (<span id="paid-total">0</span>)</summary>
-                <div id="paid-stack" class="list-stack opacity-low"></div>
+            <details class="paid-history">
+                <summary>Contas Pagas (<span id="paid-count">0</span>)</summary>
+                <div id="paid-stack" class="bill-stack faded"></div>
             </details>
         </main>
 
-        <!-- Action FAB -->
-        <button id="fab-add" class="fab-primary">+</button>
+        <!-- FAB -->
+        <button id="fab-add" class="fab-main">+</button>
     </div>
 
-    <!-- MODAL: CALENDÁRIO DINÂMICO -->
-    <div id="modal-cal" class="modal-root">
-        <div class="modal-content calendar-sheet">
+    <!-- MODAL: CALENDÁRIO DINÂMICO (Navigation Hub) -->
+    <div id="modal-cal" class="modal-overlay">
+        <div class="modal-card calendar-sheet">
             <div class="modal-top">
-                <h2 id="cal-title">Março 2026</h2>
-                <button class="btn-close">×</button>
+                <div class="cal-nav">
+                    <button id="cal-prev" class="cal-arrow">‹</button>
+                    <h2 id="cal-month-title">Março 2026</h2>
+                    <button id="cal-next" class="cal-arrow">›</button>
+                </div>
+                <button class="modal-close">×</button>
             </div>
-            <div class="cal-wrapper">
-                <div class="cal-week">
+
+            <div class="cal-body">
+                <div class="cal-week-header">
                     <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
                 </div>
-                <div id="cal-grid" class="cal-days-grid"></div>
+                <div id="cal-grid" class="cal-grid-layout"></div>
             </div>
-            <p class="cal-footer">Pressione em um dia com marcador para filtrar.</p>
+            <p class="cal-info-text">Troque o mês para atualizar o dashboard.</p>
         </div>
     </div>
 
     <!-- MODAL: NOVA CONTA -->
-    <div id="modal-bill" class="modal-root">
-        <div class="modal-content">
-            <div class="modal-top">
+    <div id="modal-form" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
                 <h2>Nova Despesa</h2>
-                <button class="btn-close">×</button>
+                <button class="modal-close">×</button>
             </div>
             <form id="form-bill">
-                <div class="form-item">
+                <div class="form-group">
                     <label>Título</label>
-                    <input type="text" id="b-title" placeholder="Ex: Internet, Aluguel" required>
+                    <input type="text" id="in-title" placeholder="Ex: Internet, Aluguel" required>
                 </div>
-                <div class="form-grid">
-                    <div class="form-item">
+                <div class="form-row">
+                    <div class="form-group">
                         <label>Valor (R$)</label>
-                        <input type="number" id="b-value" step="0.01" required>
+                        <input type="number" id="in-value" step="0.01" required>
                     </div>
-                    <div class="form-item">
+                    <div class="form-group">
                         <label>Vencimento</label>
-                        <input type="date" id="b-date" required>
+                        <input type="date" id="in-date" required>
                     </div>
                 </div>
-                <div class="form-grid">
-                    <div class="form-item">
-                        <label>Responsável</label>
-                        <select id="b-member" required></select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Membro</label>
+                        <select id="in-member" required></select>
                     </div>
-                    <div class="form-item">
+                    <div class="form-group">
                         <label>Banco</label>
-                        <select id="b-bank" required></select>
+                        <select id="in-bank" required></select>
                     </div>
                 </div>
-                <button type="submit" class="cta-btn">Salvar Conta</button>
+                <button type="submit" class="btn-primary">Salvar Despesa</button>
             </form>
         </div>
     </div>
 
     <!-- MODAL: AJUSTES -->
-    <div id="modal-settings" class="modal-root">
-        <div class="modal-content scroll-y">
-            <div class="modal-top">
-                <h2>Configurações</h2>
-                <button class="btn-close">×</button>
+    <div id="modal-settings" class="modal-overlay">
+        <div class="modal-card scrollable">
+            <div class="modal-header">
+                <h2>Ajustes & Cores</h2>
+                <button class="modal-close">×</button>
             </div>
 
-            <section class="opt-section">
-                <h3>Categorias (Membros)</h3>
+            <section class="conf-section">
+                <h3>Membros</h3>
                 <div class="add-row">
                     <input type="text" id="new-mem" placeholder="Nome...">
                     <button id="add-mem-btn">+</button>
                 </div>
-                <div id="set-members" class="pill-cloud"></div>
+                <div id="set-members-list" class="tag-cloud"></div>
             </section>
 
-            <section class="opt-section">
-                <h3>Bancos & Identidade</h3>
+            <section class="conf-section">
+                <h3>Bancos & Cores</h3>
                 <div class="add-row">
                     <input type="text" id="new-bnk" placeholder="Banco...">
                     <input type="color" id="bnk-color" value="#3b82f6">
                     <button id="add-bnk-btn">+</button>
                 </div>
-                <div id="set-banks" class="pill-cloud"></div>
+                <div id="set-banks-list" class="tag-cloud"></div>
             </section>
         </div>
     </div>

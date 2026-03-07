@@ -1,65 +1,59 @@
 /**
- * BILLS PRO V8 - PREMIUM SPA ENGINE
- * 100% Client-Side | LocalStorage | Zero Backend
+ * BILL ORGANIZER PRO V9 - SENIOR SPA LOGIC
+ * 100% LocalStorage | Dynamic Modal Calendar Navigation
  */
 
-// --- STATE MANAGEMENT ---
-let appState = {
+// --- GLOBAL STATE ---
+let state = {
     theme: 'dark',
-    members: ["Gabriel", "Casa", "Família"],
+    members: ["Gabriel", "Família", "Casa"],
     banks: [
         { name: "Nubank", color: "#8a05be" },
         { name: "Itaú", color: "#ec7000" },
-        { name: "Cash", color: "#4CAF50" }
+        { name: "Dinheiro", color: "#10B981" }
     ],
     bills: [],
-    settings: {
-        activeFilter: 'Tudo',
-        activeDate: null, // Specific day filter
-        viewPivot: new Date() // Month/Year focus
+    viewDate: new Date(), // Central Navigation Date
+    filter: {
+        member: 'Tudo',
+        day: null
     }
 };
 
-// --- DATA ACCESS LAYER ---
-function loadStore() {
-    const raw = localStorage.getItem('bills_pro_v8_final');
-    if (raw) {
-        const parsed = JSON.parse(raw);
-        appState = { ...appState, ...parsed };
-        appState.settings.viewPivot = new Date(appState.settings.viewPivot);
+// --- CORE DATA OPERATIONS ---
+function loadState() {
+    const saved = localStorage.getItem('bill_pro_v9_final');
+    if (saved) {
+        const parsed = JSON.parse(saved);
+        state = { ...state, ...parsed };
+        state.viewDate = new Date(state.viewDate);
     }
     applyTheme();
-    syncUI();
+    refreshUI();
 }
 
-function saveStore() {
-    localStorage.setItem('bills_pro_v8_final', JSON.stringify(appState));
-    syncUI();
+function saveState() {
+    localStorage.setItem('bill_pro_v9_final', JSON.stringify(state));
+    refreshUI();
 }
 
 function applyTheme() {
-    document.documentElement.setAttribute('data-theme', appState.theme);
-    const sun = document.getElementById('sun');
-    const moon = document.getElementById('moon');
-    if (appState.theme === 'dark') {
-        sun.style.display = 'block'; moon.style.display = 'none';
-    } else {
-        sun.style.display = 'none'; moon.style.display = 'block';
-    }
+    document.documentElement.setAttribute('data-theme', state.theme);
+    document.getElementById('theme-toggle').innerText = state.theme === 'dark' ? '☀️' : '🌙';
 }
 
 // --- BACKUP ENGINE ---
-function doExport() {
-    const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+function exportData() {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `backup_bills_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `backup_bills_v9_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
 }
 
-function doImport(e) {
+function importData(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -67,230 +61,217 @@ function doImport(e) {
         try {
             const data = JSON.parse(event.target.result);
             if (data.bills && data.members) {
-                appState = { ...appState, ...data };
-                appState.settings.viewPivot = new Date();
-                saveStore();
-                alert('Dados sincronizados com sucesso! 🚀');
+                state = { ...state, ...data };
+                state.viewDate = new Date();
+                saveState();
+                alert('Backup restaurado! 🚀');
             } else throw new Error();
-        } catch (err) { alert('Arquivo de backup inválido.'); }
+        } catch (err) { alert('Arquivo inválido.'); }
     };
     reader.readAsText(file);
 }
 
-// --- CORE RENDER ENGINE ---
-const el = {
-    pending: document.getElementById('pending-val'),
-    paid: document.getElementById('paid-val'),
-    month: document.getElementById('cur-month'),
-    year: document.getElementById('cur-year'),
+// --- RENDER ENGINE ---
+const ui = {
+    pending: document.getElementById('total-pending-val'),
+    paid: document.getElementById('total-paid-val'),
+    mLabel: document.getElementById('label-month'),
+    yLabel: document.getElementById('label-year'),
     pStack: document.getElementById('pending-stack'),
     hStack: document.getElementById('paid-stack'),
-    hTotal: document.getElementById('paid-total'),
-    filters: document.getElementById('filter-bar'),
-    calGrid: document.getElementById('cal-grid'),
-    calTitle: document.getElementById('cal-title')
+    hCount: document.getElementById('paid-count'),
+    pills: document.getElementById('filter-pills'),
+    calTitle: document.getElementById('cal-month-title'),
+    calGrid: document.getElementById('cal-grid')
 };
 
-function syncUI() {
-    const pivot = appState.settings.viewPivot;
+function refreshUI() {
+    const pivot = state.viewDate;
     const m = pivot.getMonth();
     const y = pivot.getFullYear();
-    const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const names = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
-    el.month.innerText = months[m];
-    el.year.innerText = y;
+    ui.mLabel.innerText = names[m];
+    ui.yLabel.innerText = y;
 
-    // Filtered data for context
-    const monthBills = appState.bills.filter(b => {
+    // Filtered month data
+    const monthBills = state.bills.filter(b => {
         const d = new Date(b.date);
         return d.getMonth() === m && d.getFullYear() === y;
     });
 
-    // Totals
-    const tp = monthBills.filter(b => !b.paid).reduce((acc, b) => acc + parseFloat(b.value), 0);
-    const th = monthBills.filter(b => b.paid).reduce((acc, b) => acc + parseFloat(b.value), 0);
+    // Sums
+    const totalP = monthBills.filter(b => !b.paid).reduce((acc, b) => acc + parseFloat(b.value), 0);
+    const totalH = monthBills.filter(b => b.paid).reduce((acc, b) => acc + parseFloat(b.value), 0);
 
-    el.pending.innerText = formatBRL(tp);
-    el.paid.innerText = formatBRL(th);
+    ui.pending.innerText = formatBRL(totalP);
+    ui.paid.innerText = formatBRL(totalH);
 
-    renderFilters();
+    renderPills();
     renderLists(monthBills);
     renderCalendar();
     syncSelectors();
-    renderSettingsPills();
+    renderSettings();
 }
 
-function renderFilters() {
-    el.filters.innerHTML = '';
-    ['Tudo', ...appState.members].forEach(m => {
+function renderPills() {
+    ui.pills.innerHTML = '';
+    ['Tudo', ...state.members].forEach(m => {
         const btn = document.createElement('button');
-        btn.className = `pill ${appState.settings.activeFilter === m ? 'active' : ''}`;
+        btn.className = `pill ${state.filter.member === m ? 'active' : ''}`;
         btn.innerText = m;
-        btn.onclick = () => { appState.settings.activeFilter = m; appState.settings.activeDate = null; saveStore(); };
-        el.filters.appendChild(btn);
+        btn.onclick = () => { state.filter.member = m; state.filter.day = null; saveState(); };
+        ui.pills.appendChild(btn);
     });
 }
 
 function renderLists(monthBills) {
-    el.pStack.innerHTML = '';
-    el.hStack.innerHTML = '';
+    ui.pStack.innerHTML = ''; ui.hStack.innerHTML = '';
 
-    const finalSet = monthBills.filter(b => {
-        const mOk = appState.settings.activeFilter === 'Tudo' || b.member === appState.settings.activeFilter;
-        const dOk = !appState.settings.activeDate || new Date(b.date).getUTCDate() === appState.settings.activeDate;
+    const filtered = monthBills.filter(b => {
+        const mOk = state.filter.member === 'Tudo' || b.member === state.filter.member;
+        const dOk = !state.filter.day || new Date(b.date).getUTCDate() === state.filter.day;
         return mOk && dOk;
     });
 
-    let countH = 0;
-    finalSet.forEach(b => {
-        const bank = appState.banks.find(bk => bk.name === b.bank) || { color: '#666' };
+    let paidN = 0;
+    filtered.forEach(b => {
+        const bank = state.banks.find(bk => bk.name === b.bank) || { color: '#666' };
         const card = document.createElement('div');
-        card.className = `card-bill ${b.paid ? 'opacity-low' : ''}`;
+        card.className = `bill-card ${b.paid ? 'faded' : ''}`;
         card.innerHTML = `
-            <div class="bill-head">
-                <div class="tag-row">
-                    <span class="mini-tag" style="background:${bank.color}">${b.bank}</span>
-                    <span class="mini-tag mem-tag">${b.member}</span>
+            <div class="b-card-left">
+                <div class="b-tags">
+                    <span class="b-tag" style="background:${bank.color}">${b.bank}</span>
+                    <span class="b-tag b-tag-mem">${b.member}</span>
                 </div>
-                <span class="bill-title">${b.title}</span>
-                <span class="bill-meta-info">Vencimento dia ${new Date(b.date).getUTCDate()}</span>
+                <span class="b-title">${b.title}</span>
+                <span class="b-due">Dia ${new Date(b.date).getUTCDate()}</span>
             </div>
-            <div class="bill-side">
-                <span class="bill-cost">${formatBRL(b.value)}</span>
-                ${!b.paid ? `<button class="check-btn" onclick="toggleBill(${b.id})">✓</button>` : '✅'}
-                <button onclick="delBill(${b.id})" style="border:none; background:none; color:red; font-size:9px; margin-left:10px; opacity:0.2;">X</button>
+            <div class="b-card-right">
+                <span class="b-val">${formatBRL(b.value)}</span>
+                ${!b.paid ? `<button class="btn-pay" onclick="toggleStatus(${b.id})">✓</button>` : '✅'}
+                <button onclick="delBill(${b.id})" style="border:none; background:none; color:red; font-size:9px; margin-left:8px; opacity:0.1;">DEL</button>
             </div>
         `;
-
-        if (b.paid) { el.hStack.appendChild(card); countH++; }
-        else { el.pStack.appendChild(card); }
+        if (b.paid) { ui.hStack.appendChild(card); paidN++; }
+        else ui.pStack.appendChild(card);
     });
-
-    el.hTotal.innerText = countH;
-    if (el.pStack.innerHTML === '') el.pStack.innerHTML = '<p style="text-align:center; padding:20px; opacity:0.3; font-size:0.8rem;">Status: Organizado ✨</p>';
+    ui.hCount.innerText = paidN;
+    if (ui.pStack.innerHTML === '') ui.pStack.innerHTML = '<p style="text-align:center; opacity:0.3; padding:20px; font-size:0.8rem;">Paz financeira! Nada pendente. ✨</p>';
 }
 
 function renderCalendar() {
-    el.calGrid.innerHTML = '';
-    const y = appState.settings.viewPivot.getFullYear();
-    const m = appState.settings.viewPivot.getMonth();
-    el.calTitle.innerText = `${el.month.innerText} ${y}`;
+    ui.calGrid.innerHTML = '';
+    const y = state.viewDate.getFullYear();
+    const m = state.viewDate.getMonth();
+    const names = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    ui.calTitle.innerText = `${names[m]} ${y}`;
 
-    const firstDay = new Date(y, m, 1).getDay();
-    const lastDate = new Date(y, m + 1, 0).getDate();
+    const first = new Date(y, m, 1).getDay();
+    const last = new Date(y, m + 1, 0).getDate();
 
-    for (let i = 0; i < firstDay; i++) el.calGrid.appendChild(document.createElement('div'));
+    for (let i = 0; i < first; i++) ui.calGrid.appendChild(document.createElement('div'));
 
-    for (let d = 1; d <= lastDate; d++) {
+    for (let d = 1; d <= last; d++) {
         const cell = document.createElement('div');
-        cell.className = `day-cell ${appState.settings.activeDate === d ? 'active-sel' : ''}`;
+        cell.className = `cal-day-cell ${state.filter.day === d ? 'active-d' : ''}`;
         cell.innerText = d;
 
-        const dayBills = appState.bills.filter(b => {
+        const dayBills = state.bills.filter(b => {
             const date = new Date(b.date);
             return date.getUTCDate() === d && date.getUTCMonth() === m && date.getUTCFullYear() === y && !b.paid;
         });
 
         if (dayBills.length > 0) {
-            const markers = document.createElement('div');
-            markers.className = 'cal-marker';
+            const dots = document.createElement('div');
+            dots.className = 'cal-dots';
             dayBills.slice(0, 3).forEach(b => {
-                const bnk = appState.banks.find(bk => bk.name === b.bank) || { color: '#666' };
+                const bnk = state.banks.find(bk => bk.name === b.bank) || { color: '#666' };
                 const dot = document.createElement('div');
-                dot.className = 'marker-dot';
-                dot.style.background = bnk.color;
-                markers.appendChild(dot);
+                dot.className = 'dot-sm'; dot.style.background = bnk.color;
+                dots.appendChild(dot);
             });
-            cell.appendChild(markers);
+            cell.appendChild(dots);
         }
 
-        if (d === new Date().getDate() && m === new Date().getMonth() && y === new Date().getFullYear()) {
-            cell.classList.add('today-is');
-        }
+        if (d === new Date().getDate() && m === new Date().getMonth() && y === new Date().getFullYear()) cell.classList.add('today-m');
 
         cell.onclick = () => {
-            appState.settings.activeDate = (appState.settings.activeDate === d) ? null : d;
+            state.filter.day = (state.filter.day === d) ? null : d;
             closeModals();
-            saveStore();
+            saveState();
         };
-        el.calGrid.appendChild(cell);
+        ui.calGrid.appendChild(cell);
     }
 }
 
 // --- ACTIONS ---
-function toggleBill(id) {
-    const i = appState.bills.findIndex(b => b.id === id);
-    if (i !== -1) { appState.bills[i].paid = !appState.bills[i].paid; saveStore(); }
+function toggleStatus(id) {
+    const i = state.bills.findIndex(b => b.id === id);
+    if (i !== -1) { state.bills[i].paid = !state.bills[i].paid; saveState(); }
 }
 
 function delBill(id) {
-    if (confirm('Deletar permanentemente?')) {
-        appState.bills = appState.bills.filter(b => b.id !== id);
-        saveStore();
+    if (confirm('Deletar despesa?')) {
+        state.bills = state.bills.filter(b => b.id !== id);
+        saveState();
     }
 }
 
-function toggleTheme() {
-    appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
-    applyTheme();
-    saveStore();
+function switchMonth(dir) {
+    state.viewDate.setMonth(state.viewDate.getMonth() + dir);
+    state.filter.day = null;
+    saveState();
 }
 
-// --- APP BINDINGS ---
-document.getElementById('prev-m').onclick = () => { appState.settings.viewPivot.setMonth(appState.settings.viewPivot.getMonth() - 1); appState.settings.activeDate = null; saveStore(); };
-document.getElementById('next-m').onclick = () => { appState.settings.viewPivot.setMonth(appState.settings.viewPivot.getMonth() + 1); appState.settings.activeDate = null; saveStore(); };
-document.getElementById('theme-btn').onclick = toggleTheme;
-document.getElementById('export-btn').onclick = doExport;
+// --- BINDINGS ---
+document.getElementById('theme-toggle').onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; applyTheme(); saveState(); };
+document.getElementById('export-json').onclick = exportData;
 document.getElementById('import-trigger').onclick = () => document.getElementById('import-file').click();
-document.getElementById('import-file').onchange = doImport;
+document.getElementById('import-file').onchange = importData;
 
-document.getElementById('open-cal').onclick = () => document.getElementById('modal-cal').style.display = 'flex';
-document.getElementById('open-settings').onclick = () => document.getElementById('modal-settings').style.display = 'flex';
-document.getElementById('fab-add').onclick = () => document.getElementById('modal-bill').style.display = 'flex';
+document.getElementById('btn-open-cal').onclick = () => document.getElementById('modal-cal').style.display = 'flex';
+document.getElementById('btn-open-settings').onclick = () => document.getElementById('modal-settings').style.display = 'flex';
+document.getElementById('fab-add').onclick = () => document.getElementById('modal-form').style.display = 'flex';
 
-function closeModals() { document.querySelectorAll('.modal-root').forEach(m => m.style.display = 'none'); }
-document.querySelectorAll('.btn-close').forEach(b => b.onclick = closeModals);
+document.getElementById('cal-prev').onclick = () => switchMonth(-1);
+document.getElementById('cal-next').onclick = () => switchMonth(1);
+
+function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+document.querySelectorAll('.modal-close').forEach(b => b.onclick = closeModals);
 
 document.getElementById('form-bill').onsubmit = (e) => {
     e.preventDefault();
-    appState.bills.push({
+    state.bills.push({
         id: Date.now(),
-        title: document.getElementById('b-title').value,
-        value: document.getElementById('b-value').value,
-        date: document.getElementById('b-date').value,
-        member: document.getElementById('b-member').value,
-        bank: document.getElementById('b-bank').value,
+        title: document.getElementById('in-title').value,
+        value: document.getElementById('in-value').value,
+        date: document.getElementById('in-date').value,
+        member: document.getElementById('in-member').value,
+        bank: document.getElementById('in-bank').value,
         paid: false
     });
-    e.target.reset();
-    closeModals();
-    saveStore();
+    e.target.reset(); closeModals(); saveState();
 };
 
-// --- SETTINGS LOGIC ---
 function syncSelectors() {
-    const mS = document.getElementById('b-member');
-    const bS = document.getElementById('b-bank');
+    const mS = document.getElementById('in-member'), bS = document.getElementById('in-bank');
     mS.innerHTML = ''; bS.innerHTML = '';
-    appState.members.forEach(m => mS.innerHTML += `<option value="${m}">${m}</option>`);
-    appState.banks.forEach(b => bS.innerHTML += `<option value="${b.name}">${b.name}</option>`);
+    state.members.forEach(m => mS.innerHTML += `<option value="${m}">${m}</option>`);
+    state.banks.forEach(b => bS.innerHTML += `<option value="${b.name}">${b.name}</option>`);
 }
 
-function renderSettingsPills() {
-    const mC = document.getElementById('set-members');
-    const bC = document.getElementById('set-banks');
+function renderSettings() {
+    const mC = document.getElementById('set-members-list'), bC = document.getElementById('set-banks-list');
     mC.innerHTML = ''; bC.innerHTML = '';
-
-    appState.members.forEach(m => {
-        const div = document.createElement('div');
-        div.className = 'rem-pill';
+    state.members.forEach(m => {
+        const div = document.createElement('div'); div.className = 'tag-item';
         div.innerHTML = `<span>${m}</span> <button class="btn-del-mini" onclick="remItem('${m}', 'm')">×</button>`;
         mC.appendChild(div);
     });
-
-    appState.banks.forEach(b => {
-        const div = document.createElement('div');
-        div.className = 'rem-pill';
+    state.banks.forEach(b => {
+        const div = document.createElement('div'); div.className = 'tag-item';
         div.innerHTML = `<span style="color:${b.color}">●</span> <span>${b.name}</span> <button class="btn-del-mini" onclick="remItem('${b.name}', 'b')">×</button>`;
         bC.appendChild(div);
     });
@@ -298,25 +279,22 @@ function renderSettingsPills() {
 
 function remItem(name, type) {
     if (confirm(`Remover ${name}?`)) {
-        if (type === 'm') appState.members = appState.members.filter(x => x !== name);
-        else appState.banks = appState.banks.filter(x => x.name !== name);
-        saveStore();
+        if (type === 'm') state.members = state.members.filter(x => x !== name);
+        else state.banks = state.banks.filter(x => x.name !== name);
+        saveState();
     }
 }
 
 document.getElementById('add-mem-btn').onclick = () => {
-    const i = document.getElementById('new-mem');
-    if (i.value) { appState.members.push(i.value); i.value = ''; saveStore(); }
+    const i = document.getElementById('new-mem'); if (i.value) { state.members.push(i.value); i.value = ''; saveState(); }
 };
 
 document.getElementById('add-bnk-btn').onclick = () => {
-    const n = document.getElementById('new-bnk');
-    const c = document.getElementById('bnk-color');
-    if (n.value) { appState.banks.push({ name: n.value, color: c.value }); n.value = ''; saveStore(); }
+    const n = document.getElementById('new-bnk'), c = document.getElementById('bnk-color');
+    if (n.value) { state.banks.push({ name: n.value, color: c.value }); n.value = ''; saveState(); }
 };
 
-// --- HELPERS ---
 function formatBRL(v) { return `R$ ${parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`; }
 
-// --- INIT ---
-loadStore();
+// --- BOOT ---
+loadState();
