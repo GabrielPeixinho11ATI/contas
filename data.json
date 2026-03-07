@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "nome_conta": "Internet Fibra",
+    "valor": 120.00,
+    "data_vencimento": "2026-03-10",
+    "status": "pendente"
+  },
+  {
+    "id": 2,
+    "nome_conta": "Energia Elétrica",
+    "valor": 250.50,
+    "data_vencimento": "2026-03-15",
+    "status": "pago"
+  },
+  {
+    "id": 3,
+    "nome_conta": "Aluguel",
+    "valor": 1500.00,
+    "data_vencimento": "2026-03-05",
+    "status": "pendente"
+  },
+  {
+    "id": 4,
+    "nome_conta": "Assinatura Streaming",
+    "valor": 39.90,
+    "data_vencimento": "2026-03-20",
+    "status": "pendente"
+  }
+]

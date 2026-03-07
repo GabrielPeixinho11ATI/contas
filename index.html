@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizador de Contas - Família</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <div class="header-top">
+                <h1>Finanças</h1>
+                <button id="manage-folders" class="btn-config">⚙️ Pastas</button>
+            </div>
+            <div class="total-card">
+                <span>Total Pendente</span>
+                <h2 id="total-amount">R$ 0,00</h2>
+            </div>
+        </header>
+
+        <section class="nav-section">
+            <div class="folder-pills" id="folder-pills">
+                <!-- Pílulas serão renderizadas aqui -->
+            </div>
+        </section>
+
+        <section>
+            <div class="bills-list" id="bills-list">
+                <!-- Cards serão renderizados aqui -->
+            </div>
+        </section>
+
+        <button class="fab" id="open-modal">+</button>
+    </div>
+
+    <!-- Modal de Cadastro de Conta -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nova Conta</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="bill-form">
+                <div class="form-group">
+                    <label>Nome da Conta</label>
+                    <input type="text" id="nome_conta" placeholder="Ex: Internet" required>
+                </div>
+                <div class="form-group">
+                    <label>Pasta / Membro</label>
+                    <select id="categoria_conta" required>
+                        <!-- Options via JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Valor (R$)</label>
+                    <input type="number" id="valor" step="0.01" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                    <label>Data de Vencimento</label>
+                    <input type="date" id="data_vencimento" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Adicionar Conta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Gestão de Pastas -->
+    <div class="modal-overlay" id="modal-folders">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Gerir Pastas</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+
+            <form id="folder-form" class="folder-add-form">
+                <input type="text" id="new_folder_name" placeholder="Nome da pasta (Ex: Gabriel)" required>
+                <button type="submit" class="btn-add-mini">+</button>
+            </form>
+
+            <div class="folder-list-manager" id="folder-list-manager">
+                <!-- Lista de pastas para excluir -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

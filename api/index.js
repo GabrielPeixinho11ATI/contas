@@ -1,0 +1,98 @@
+const express = require('express');
+const mysql = require('mysql2');
+const cors = require('cors');
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+// Configuração do Banco de Dados via Variáveis de Ambiente
+// Importante para Vercel e Segurança
+const dbConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'organizador_contas',
+    ssl: {
+        rejectUnauthorized: false // Necessário para muitos bancos na nuvem (Aiven, PlanetScale)
+    }
+};
+
+const pool = mysql.createPool(dbConfig);
+const db = pool.promise();
+
+// --- ROTAS DE API (Prefixadas com /api para Vercel) ---
+
+app.get('/api/membros', async (req, res) => {
+    try {
+        const [results] = await db.query('SELECT * FROM membros');
+        res.json(results);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/membros', async (req, res) => {
+    try {
+        const { nome } = req.body;
+        const [result] = await db.query('INSERT INTO membros (nome) VALUES (?)', [nome]);
+        res.json({ id: result.insertId, nome });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/membros/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.query('DELETE FROM membros WHERE id = ?', [id]);
+        res.json({ message: 'Membro removido' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/contas', async (req, res) => {
+    try {
+        const query = `
+            SELECT c.*, m.nome as categoria 
+            FROM contas c 
+            JOIN membros m ON c.membro_id = m.id
+        `;
+        const [results] = await db.query(query);
+        res.json(results);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/contas', async (req, res) => {
+    try {
+        const { nome_conta, valor, data_vencimento, membro_id } = req.body;
+        const query = 'INSERT INTO contas (nome_conta, valor, data_vencimento, membro_id) VALUES (?, ?, ?, ?)';
+        const [result] = await db.query(query, [nome_conta, valor, data_vencimento, membro_id]);
+        res.json({ id: result.insertId, message: 'Conta criada!' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.patch('/api/contas/:id/pagar', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.query("UPDATE contas SET status = 'pago' WHERE id = ?", [id]);
+        res.json({ message: 'Pago!' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Para rodar localmente fora da Vercel
+if (process.env.NODE_ENV !== 'production') {
+    const port = 3000;
+    app.listen(port, () => {
+        console.log(`Servidor local: http://localhost:${port}`);
+    });
+}
+
+module.exports = app;
