@@ -25,6 +25,15 @@
             --calendar-w: 340px;
         }
 
+        [data-theme="light"] {
+            --bg: #F4F4F5;
+            --card: #FFFFFF;
+            --border: #E4E4E7;
+            --text: #18181B;
+            --text-dim: #71717A;
+            --accent: #7C3AED;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -47,6 +56,8 @@
             transition: 0.2s;
             border: none;
             outline: none;
+            background: none;
+            color: inherit;
         }
 
         button:active {
@@ -72,7 +83,7 @@
             padding-bottom: 110px;
         }
 
-        /* === HEADER (MOBILE & PC) === */
+        /* === HEADER === */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -94,7 +105,8 @@
 
         .header-tools {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            align-items: center;
         }
 
         .tool-btn {
@@ -125,10 +137,14 @@
             border-radius: var(--radius-xl);
             padding: 40px 25px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
             position: relative;
             overflow: hidden;
+        }
+
+        [data-theme="dark"] .hero-card {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
         .label-xs {
@@ -155,7 +171,6 @@
             opacity: 0.9;
         }
 
-        /* MEMBER GRID */
         .folder-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -317,7 +332,7 @@
             place-items: center;
         }
 
-        /* === DESKTOP LAYOUT (3-COLUMNS) === */
+        /* === DESKTOP LAYOUT === */
         @media (min-width: 1024px) {
             .app-shell {
                 display: grid;
@@ -341,7 +356,6 @@
                 overflow-y: auto;
             }
 
-            /* SIDEBAR L */
             .sidebar-l {
                 background: var(--card);
                 border-right: 1px solid var(--border);
@@ -418,7 +432,6 @@
                 margin-bottom: 40px;
             }
 
-            /* TABLE PC */
             .pc-table-card {
                 background: var(--card);
                 border: 1px solid var(--border);
@@ -455,12 +468,30 @@
                 font-size: 1.1rem;
             }
 
-            /* SIDEBAR R */
             .sidebar-r {
                 background: var(--card);
                 border-left: 1px solid var(--border);
                 padding: 40px 25px;
                 flex-direction: column;
+            }
+
+            .sidebar-footer {
+                margin-top: auto;
+                display: flex;
+                gap: 10px;
+            }
+
+            .side-tool {
+                flex: 1;
+                padding: 16px;
+                border-radius: 14px;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                color: var(--text);
+                cursor: pointer;
+                display: grid;
+                place-items: center;
+                font-size: 1.2rem;
             }
         }
 
@@ -507,6 +538,7 @@
             background: none;
             color: var(--text-dim);
             font-size: 2rem;
+            cursor: pointer;
         }
 
         .form-row {
@@ -539,10 +571,13 @@
             color: var(--text);
             font-weight: 600;
             font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
         }
 
         .field input:focus {
             border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(187, 134, 252, 0.1);
         }
 
         .modal-btns {
@@ -622,22 +657,16 @@
             color: var(--accent);
         }
 
-        .cal-dots {
-            display: flex;
-            gap: 3px;
-            position: absolute;
-            bottom: 8px;
-        }
-
         .cal-dot {
             width: 5px;
             height: 5px;
             border-radius: 50%;
             background: var(--accent);
             box-shadow: 0 0 5px var(--accent);
+            position: absolute;
+            bottom: 8px;
         }
 
-        /* ANIMATIONS */
         .fade-in {
             animation: animFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
@@ -658,56 +687,55 @@
 
 <body>
     <div class="app-shell">
-        <!-- SIDEBAR L (PC) -->
         <aside class="desktop-only sidebar-l">
-            <h1>Bills Pro V10</h1>
-            <button class="pc-add-btn" id="trigger-add-pc">+ Adicionar Conta</button>
+            <h1 id="brand-l">Bills Pro V10</h1>
+            <button class="pc-add-btn" id="open-add-pc">+ Adicionar Conta</button>
             <nav class="nav-group">
                 <h3>Pastas Familiares</h3>
                 <div id="filter-container" class="filter-stack"></div>
             </nav>
+            <div class="sidebar-footer">
+                <button class="side-tool" onclick="exportData()" title="Backup Download">📥</button>
+                <button class="side-tool" onclick="triggerImport()" title="Backup Upload">📤</button>
+                <button class="side-tool" onclick="toggleTheme()" title="Alterar Tema">🌓</button>
+            </div>
         </aside>
 
-        <!-- MAIN AREA -->
         <main class="main-content">
             <header class="app-header">
                 <div class="brand">
                     <h1>Bills Pro <span style="font-weight:400; font-size:0.8rem; opacity:0.6;">V10</span></h1>
                 </div>
                 <div class="header-tools">
-                    <button class="tool-btn" onclick="exportData()" title="Exportar Backup">📥</button>
-                    <button class="tool-btn" onclick="triggerImport()" title="Importar Backup">📤</button>
-                    <button class="tool-btn" onclick="openMobileCal()" class="mobile-only"
-                        title="Calendário">📅</button>
+                    <button class="tool-btn" onclick="toggleTheme()" title="Trocar Tema">🌓</button>
+                    <button class="tool-btn" onclick="exportData()" title="Exportar">📥</button>
+                    <button class="tool-btn" onclick="triggerImport()" title="Importar">📤</button>
+                    <button class="tool-btn desktop-only" onclick="openSettings()" title="Ajustes">⚙️</button>
+                    <button class="tool-btn mobile-only" onclick="openMobileCal()" title="Calendário">📅</button>
                 </div>
             </header>
 
             <section class="dash-section">
-                <!-- Sumário Principal -->
                 <div class="hero-card">
                     <p class="label-xs">Total Geral Pendente</p>
                     <h1 id="total-geral" class="val-hero">R$ 0,00</h1>
                     <p class="val-paid-row">Total Pago este mês: <span id="total-pago">R$ 0,00</span></p>
                 </div>
 
-                <!-- Cards por Membro -->
                 <div id="member-grid" class="folder-grid"></div>
 
-                <!-- Título do Mês Mobile/PC -->
                 <div class="list-header">
                     <span id="month-label" style="color:var(--accent); font-size:1rem;"></span>
-                    <div class="desktop-only" style="display:flex; gap:10px;">
+                    <div style="display:flex; gap:10px;">
                         <button class="cal-nav" onclick="moveMonth(-1)"
-                            style="width:30px; height:30px; font-size:1rem;">‹</button>
+                            style="width:34px; height:34px; font-size:1rem;">‹</button>
                         <button class="cal-nav" onclick="moveMonth(1)"
-                            style="width:30px; height:30px; font-size:1rem;">›</button>
+                            style="width:34px; height:34px; font-size:1rem;">›</button>
                     </div>
                 </div>
 
-                <!-- Listagem Real -->
                 <div id="bill-container"></div>
 
-                <!-- Histórico de Pagas -->
                 <details style="margin-top:40px; cursor:pointer;" open>
                     <summary
                         style="text-align:center; color:var(--text-dim); font-weight:850; font-size:0.85rem; padding:20px; border-top:1px solid var(--border); list-style:none;">
@@ -718,7 +746,6 @@
             </section>
         </main>
 
-        <!-- SIDEBAR R (PC) -->
         <aside class="desktop-only sidebar-r">
             <div class="cal-head">
                 <button class="cal-nav" onclick="moveMonth(-1)">‹</button>
@@ -728,28 +755,26 @@
             <div id="cal-grid-pc" class="cal-grid"></div>
         </aside>
 
-        <!-- FAB MOBILE -->
-        <button class="fab-add" id="trigger-add-mobile">+</button>
+        <button class="fab-add" id="open-add-mobile">+</button>
     </div>
 
-    <!-- MODAL: ADD BILL -->
+    <!-- MODALS -->
     <div id="modal-bill" class="modal-wrap">
         <div class="modal-box">
             <div class="modal-h">
-                <h2>Nova Despesa</h2>
-                <button class="btn-close" onclick="closeModals()">×</button>
+                <h2>Nova Despesa</h2><button class="btn-close" onclick="closeModals()">×</button>
             </div>
             <form id="bill-form">
                 <div class="field"><label>Nome da Conta</label><input type="text" id="in-title" required
-                        placeholder="Ex: Aluguel, Nubank"></div>
+                        placeholder="Ex: Aluguel, Mercado Pago"></div>
                 <div class="form-row">
                     <div class="field"><label>Valor (R$)</label><input type="number" id="in-value" step="0.01" required>
                     </div>
                     <div class="field"><label>Vencimento</label><input type="date" id="in-date" required></div>
                 </div>
                 <div class="form-row">
-                    <div class="field"><label>Membro (Pasta)</label><select id="in-member" required></select></div>
-                    <div class="field"><label>Banco / Origem</label><select id="in-bank" required></select></div>
+                    <div class="field"><label>Membro</label><select id="in-member" required></select></div>
+                    <div class="field"><label>Banco</label><select id="in-bank" required></select></div>
                 </div>
                 <div class="modal-btns">
                     <button type="button" class="cancel-btn" onclick="closeModals()">Cancelar</button>
@@ -759,7 +784,6 @@
         </div>
     </div>
 
-    <!-- MODAL: CALENDÁRIO MOBILE -->
     <div id="modal-cal" class="modal-wrap">
         <div class="modal-box">
             <div class="modal-h">
@@ -774,12 +798,11 @@
         </div>
     </div>
 
-    <!-- HIDDEN INPUTS -->
     <input type="file" id="import-input" style="display:none" onchange="processImport(event)">
 
     <script>
         /**
-         * LOGIC ENGINE - SENIOR RE-ARCHITECTED
+         * ENGINE - BILLS PRO SENIOR
          */
         const CONFIG = {
             members: ["Gabriel", "Gabi", "Papai", "Mãe"],
@@ -795,62 +818,39 @@
             storageKey: 'billspro_v10_senior_fix'
         };
 
-        let db = {
-            bills: [],
-            viewDate: new Date(),
-            filter: "Tudo"
-        };
+        let db = { bills: [], viewDate: new Date(), filter: "Tudo" };
 
-        // --- HELPER WRAPPERS (FAIL-SAFE) ---
         const ui = (id) => document.getElementById(id);
 
-        function formatBRL(v) {
-            return (parseFloat(v) || 0).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
-        }
+        function formatBRL(v) { return (parseFloat(v) || 0).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }); }
 
-        // --- CORE MATH & RENDERING ---
         function atualizarDashboard() {
-            const m = db.viewDate.getMonth();
-            const y = db.viewDate.getFullYear();
+            const m = db.viewDate.getMonth(), y = db.viewDate.getFullYear();
             const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
             const dateStr = `${months[m]} ${y}`;
 
-            // Sync Header Titles
             if (ui('cal-title-pc')) ui('cal-title-pc').innerText = dateStr;
             if (ui('cal-title-mobile')) ui('cal-title-mobile').innerText = dateStr;
             if (ui('month-label')) ui('month-label').innerText = dateStr;
 
-            // Filter data
-            const currentMonthBills = db.bills.filter(b => {
+            const current = db.bills.filter(b => {
                 const [by, bm] = b.date.split('-').map(Number);
                 return (bm - 1) === m && by === y;
             });
 
-            const unpaidBills = currentMonthBills.filter(b => !b.paid);
-            const paidBills = currentMonthBills.filter(b => b.paid);
+            const unpaid = current.filter(b => !b.paid), paid = current.filter(b => b.paid);
+            if (ui('total-geral')) ui('total-geral').innerText = formatBRL(unpaid.reduce((a, b) => a + (parseFloat(b.value) || 0), 0));
+            if (ui('total-pago')) ui('total-pago').innerText = formatBRL(paid.reduce((a, b) => a + (parseFloat(b.value) || 0), 0));
 
-            const totalUnpaid = unpaidBills.reduce((acc, b) => acc + (parseFloat(b.value) || 0), 0);
-            const totalPaid = paidBills.reduce((acc, b) => acc + (parseFloat(b.value) || 0), 0);
-
-            if (ui('total-geral')) ui('total-geral').innerText = formatBRL(totalUnpaid);
-            if (ui('total-pago')) ui('total-pago').innerText = formatBRL(totalPaid);
-
-            // Member Grid
             const grid = ui('member-grid');
             if (grid) {
                 grid.innerHTML = '';
                 CONFIG.members.forEach(mem => {
-                    const memVal = unpaidBills.filter(b => b.member === mem).reduce((a, b) => a + (parseFloat(b.value) || 0), 0);
-                    grid.innerHTML += `
-                        <div class="folder-card fade-in">
-                            <p class="folder-name">${mem}</p>
-                            <p class="folder-val">${formatBRL(memVal)}</p>
-                        </div>
-                    `;
+                    const v = unpaid.filter(b => b.member === mem).reduce((a, b) => a + (parseFloat(b.value) || 0), 0);
+                    grid.innerHTML += `<div class="folder-card fade-in"><p class="folder-name">${mem}</p><p class="folder-val">${formatBRL(v)}</p></div>`;
                 });
             }
 
-            // Sidebar Filters
             const filterBox = ui('filter-container');
             if (filterBox) {
                 filterBox.innerHTML = '';
@@ -863,73 +863,43 @@
                 });
             }
 
-            renderBills(currentMonthBills);
+            renderBills(current);
             renderCalendar('pc', m, y);
             renderCalendar('mobile', m, y);
         }
 
         function renderBills(all) {
-            const list = ui('bill-container');
-            const history = ui('history-container');
+            const list = ui('bill-container'), history = ui('history-container');
             if (!list || !history) return;
-
             list.innerHTML = ''; history.innerHTML = '';
 
             const filtered = all.filter(b => db.filter === "Tudo" || b.member === db.filter);
-            const pendentes = filtered.filter(b => !b.paid);
-            const pagas = filtered.filter(b => b.paid);
-
+            const pendentes = filtered.filter(b => !b.paid), pagas = filtered.filter(b => b.paid);
             if (ui('count-paid')) ui('count-paid').innerText = pagas.length;
 
             if (window.innerWidth >= 1024) {
-                const tableWrap = document.createElement('div');
-                tableWrap.className = 'pc-table-card fade-in';
-                tableWrap.innerHTML = `
-                    <table class="pc-table">
-                        <thead><tr><th>Status</th><th>Descrição</th><th>Membro</th><th>Banco</th><th>Valor</th><th>Ações</th></tr></thead>
-                        <tbody id="tbody-pc"></tbody>
-                    </table>
-                `;
-                list.appendChild(tableWrap);
-                const tbody = ui('tbody-pc');
+                const wrap = document.createElement('div');
+                wrap.className = 'pc-table-card fade-in';
+                wrap.innerHTML = `<table class="pc-table"><thead><tr><th>Status</th><th>Descrição</th><th>Pasta</th><th>Banco</th><th>Valor</th><th>Ações</th></tr></thead><tbody id="tb-pc"></tbody></table>`;
+                list.appendChild(wrap);
+                const tbody = ui('tb-pc');
                 [...pendentes, ...pagas].forEach(b => {
                     const tr = document.createElement('tr');
                     if (b.paid) tr.className = 'is-paid';
-                    tr.innerHTML = `
-                        <td>${b.paid ? '✅' : '⏳'}</td>
-                        <td style="font-weight:800">${b.title}</td>
-                        <td>${b.member}</td>
-                        <td style="color:${getBankColor(b.bank)}; font-weight:800">${b.bank}</td>
-                        <td class="accent-val">${formatBRL(b.value)}</td>
-                        <td><div class="b-btns">
-                            ${!b.paid ? `<button class="circle-btn btn-pay" onclick="markAsPaid(${b.id})">✓</button>` : ''}
-                            <button class="circle-btn btn-del" onclick="deleteBill(${b.id})">×</button>
-                        </div></td>
-                    `;
+                    tr.innerHTML = `<td>${b.paid ? '✅' : '⏳'}</td><td style="font-weight:800">${b.title}</td><td>${b.member}</td><td style="color:${getBankColor(b.bank)}; font-weight:800">${b.bank}</td><td class="accent-val">${formatBRL(b.value)}</td><td><div class="b-btns">${!b.paid ? `<button class="circle-btn btn-pay" onclick="pay(${b.id})">✓</button>` : ''}<button class="circle-btn btn-del" onclick="del(${b.id})">×</button></div></td>`;
                     tbody.appendChild(tr);
                 });
             } else {
-                pendentes.forEach(b => list.appendChild(createMobileCard(b)));
-                pagas.forEach(b => history.appendChild(createMobileCard(b)));
+                pendentes.forEach(b => list.appendChild(createCard(b)));
+                pagas.forEach(b => history.appendChild(createCard(b)));
             }
         }
 
-        function createMobileCard(b) {
-            const clr = getBankColor(b.bank);
-            const div = document.createElement('div');
+        function createCard(b) {
+            const clr = getBankColor(b.bank), div = document.createElement('div');
             div.className = `bill-card fade-in ${b.paid ? 'is-paid' : ''}`;
             const [, , bd] = b.date.split('-').map(Number);
-            div.innerHTML = `
-                <div class="b-header"><span class="bank-badge" style="background:${clr}">${b.bank}</span><span class="b-val">${formatBRL(b.value)}</span></div>
-                <span class="b-title">${b.title}</span>
-                <div class="b-footer">
-                    <span class="b-info">${b.member} • Dia ${bd}</span>
-                    <div class="b-btns">
-                        ${!b.paid ? `<button class="circle-btn btn-pay" onclick="markAsPaid(${b.id})">✓</button>` : ''}
-                        <button class="circle-btn btn-del" onclick="deleteBill(${b.id})">×</button>
-                    </div>
-                </div>
-            `;
+            div.innerHTML = `<div class="b-header"><span class="bank-badge" style="background:${clr}">${b.bank}</span><span class="b-val">${formatBRL(b.value)}</span></div><span class="b-title">${b.title}</span><div class="b-footer"><span class="b-info">${b.member} • Dia ${bd}</span><div class="b-btns">${!b.paid ? `<button class="circle-btn btn-pay" onclick="pay(${b.id})">✓</button>` : ''}<button class="circle-btn btn-del" onclick="del(${b.id})">×</button></div></div>`;
             return div;
         }
 
@@ -938,121 +908,72 @@
             if (!grid) return;
             grid.innerHTML = '';
             ["D", "S", "T", "Q", "Q", "S", "S"].forEach(h => grid.innerHTML += `<div class="cal-w">${h}</div>`);
-
-            const first = new Date(y, m, 1).getDay();
-            const last = new Date(y, m + 1, 0).getDate();
-            const today = new Date();
-
+            const first = new Date(y, m, 1).getDay(), last = new Date(y, m + 1, 0).getDate(), today = new Date();
             for (let i = 0; i < first; i++) grid.innerHTML += '<div></div>';
             for (let d = 1; d <= last; d++) {
                 const day = document.createElement('div');
-                day.className = 'cal-day';
-                day.innerText = d;
-                const pending = db.bills.some(b => {
-                    const [by, bm, bd] = b.date.split('-').map(Number);
-                    return !b.paid && bd === d && (bm - 1) === m && by === y;
-                });
-                if (pending) day.innerHTML += `<div class="cal-dots"><div class="cal-dot"></div></div>`;
+                day.className = 'cal-day'; day.innerText = d;
+                const has = db.bills.some(b => { const [by, bm, bd] = b.date.split('-').map(Number); return !b.paid && bd === d && (bm - 1) === m && by === y; });
+                if (has) day.innerHTML += `<div class="cal-dot"></div>`;
                 if (d === today.getDate() && m === today.getMonth() && y === today.getFullYear()) day.classList.add('is-today');
                 grid.appendChild(day);
             }
         }
 
-        // --- HANDLERS & PERSISTENCE ---
-        function save() {
-            localStorage.setItem(CONFIG.storageKey, JSON.stringify({ bills: db.bills }));
-            atualizarDashboard();
-        }
-
+        function save() { localStorage.setItem(CONFIG.storageKey, JSON.stringify({ bills: db.bills })); atualizarDashboard(); }
         function load() {
             const saved = localStorage.getItem(CONFIG.storageKey);
             if (saved) db.bills = JSON.parse(saved).bills || [];
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
             atualizarDashboard();
         }
 
-        function markAsPaid(id) {
-            const b = db.bills.find(x => x.id === id);
-            if (b) { b.paid = true; save(); }
-        }
+        function pay(id) { const b = db.bills.find(x => x.id === id); if (b) { b.paid = true; save(); } }
+        function del(id) { if (confirm('Excluir?')) { db.bills = db.bills.filter(x => x.id !== id); save(); } }
+        function moveMonth(v) { db.viewDate.setMonth(db.viewDate.getMonth() + v); atualizarDashboard(); }
 
-        function deleteBill(id) {
-            if (confirm('Deseja excluir esta conta?')) {
-                db.bills = db.bills.filter(x => x.id !== id);
-                save();
-            }
-        }
-
-        function moveMonth(v) {
-            db.viewDate.setMonth(db.viewDate.getMonth() + v);
-            atualizarDashboard();
-        }
-
-        // --- UI TRIGGERS ---
         function openBillForm() {
-            const f = ui('bill-form');
-            if (f) f.reset();
-            const memSel = ui('in-member');
-            const bnkSel = ui('in-bank');
-            if (memSel) memSel.innerHTML = CONFIG.members.map(m => `<option value="${m}">${m}</option>`).join('');
-            if (bnkSel) bnkSel.innerHTML = CONFIG.banks.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+            ui('bill-form').reset();
+            ui('in-member').innerHTML = CONFIG.members.map(m => `<option value="${m}">${m}</option>`).join('');
+            ui('in-bank').innerHTML = CONFIG.banks.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
             ui('modal-bill').style.display = 'flex';
         }
 
-        function closeModals() {
-            document.querySelectorAll('.modal-wrap').forEach(m => m.style.display = 'none');
-        }
-
+        function closeModals() { document.querySelectorAll('.modal-wrap').forEach(m => m.style.display = 'none'); }
         function openMobileCal() { ui('modal-cal').style.display = 'flex'; }
+        function openSettings() { alert('Recursos de Backup na Sidebar!'); }
 
-        // FORM SUBMIT
-        if (ui('bill-form')) {
-            ui('bill-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const val = ui('in-value').value;
-                db.bills.push({
-                    id: Date.now(),
-                    title: ui('in-title').value,
-                    value: parseFloat(val).toFixed(2),
-                    date: ui('in-date').value,
-                    member: ui('in-member').value,
-                    bank: ui('in-bank').value,
-                    paid: false
-                });
-                closeModals();
-                save();
-            });
+        ui('bill-form').onsubmit = (e) => {
+            e.preventDefault();
+            db.bills.push({ id: Date.now(), title: ui('in-title').value, value: parseFloat(ui('in-value').value).toFixed(2), date: ui('in-date').value, member: ui('in-member').value, bank: ui('in-bank').value, paid: false });
+            closeModals(); save();
+        };
+
+        ui('open-add-pc').onclick = ui('open-add-mobile').onclick = openBillForm;
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
         }
 
-        // LISTENERS
-        if (ui('trigger-add-pc')) ui('trigger-add-pc').onclick = openBillForm;
-        if (ui('trigger-add-mobile')) ui('trigger-add-mobile').onclick = openBillForm;
-
-        // BACKUP
         function exportData() {
             const blob = new Blob([JSON.stringify(db.bills, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `backup_contas_pro.json`; a.click();
+            const a = document.createElement('a'); a.href = url; a.download = `backup_billspro.json`; a.click();
         }
         function triggerImport() { ui('import-input').click(); }
         function processImport(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+            const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                try {
-                    const imported = JSON.parse(ev.target.result);
-                    db.bills = Array.isArray(imported) ? imported : (imported.bills || []);
-                    save();
-                    alert('Backup Restaurado!');
-                } catch (err) { alert('Erro ao importar arquivo.'); }
-            };
+            reader.onload = (ev) => { try { db.bills = JSON.parse(ev.target.result); save(); alert('Backup Importado!'); } catch (e) { alert('Erro!'); } };
             reader.readAsText(file);
         }
 
         window.onclick = (e) => { if (e.target.classList.contains('modal-wrap')) closeModals(); };
         window.onresize = atualizarDashboard;
-
-        // BOOT
         document.addEventListener('DOMContentLoaded', load);
     </script>
 </body>
