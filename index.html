@@ -230,6 +230,63 @@
             border-color: var(--text);
         }
 
+        /* Folder Totals (New) */
+        .folders-container {
+            margin-top: 15px;
+            padding: 0 20px 25px;
+        }
+
+        .folder-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 5px;
+        }
+
+        .folder-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .folder-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 15px 20px;
+            min-width: 140px;
+            flex-shrink: 0;
+            text-align: left;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .folder-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+            opacity: 0.6;
+        }
+
+        .folder-name {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .folder-val {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--text);
+        }
+
         /* Bill Feed (Mobile Cards) */
         .feed-pane {
             padding: 0 20px;
@@ -435,6 +492,36 @@
                 font-size: 2rem;
                 font-weight: 900;
                 letter-spacing: -1px;
+            }
+
+            .pc-folder-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-top: 20px;
+                border-top: 1px solid var(--border);
+                padding-top: 20px;
+            }
+
+            .pc-folder-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+            }
+
+            .pc-folder-item span:first-child {
+                font-size: 0.8rem;
+                font-weight: 700;
+                color: var(--text-dim);
+            }
+
+            .pc-folder-item span:last-child {
+                font-size: 0.9rem;
+                font-weight: 800;
             }
 
             .pc-cta-btn {
@@ -779,9 +866,14 @@
             <button id="pc-add-btn" class="pc-cta-btn">+ Adicionar Nova Conta</button>
 
             <div class="sidebar-stats-card">
-                <p>Total do Mês (Pendente)</p>
+                <p>Total Geral Pendente</p>
                 <h2 class="pending-val-display">R$ 0,00</h2>
                 <div class="paid-summary">Pago: <span class="paid-val-display">R$ 0,00</span></div>
+
+                <!-- Totais por Pasta (PC) -->
+                <div id="folder-list-pc" class="pc-folder-grid">
+                    <!-- Dinâmico -->
+                </div>
             </div>
 
             <nav class="pc-nav">
@@ -828,9 +920,16 @@
                         <button id="dash-next" class="nav-arrow">›</button>
                     </div>
 
-                    <p class="pending-label">Total Pendente</p>
+                    <p class="pending-label">Total Geral Pendente</p>
                     <h1 class="pending-val-display">R$ 0,00</h1>
                     <p class="paid-summary">Pago este mês: <span class="paid-val-display">R$ 0,00</span></p>
+                </div>
+            </section>
+
+            <!-- Totais por Pasta (Mobile) -->
+            <section class="folders-container">
+                <div id="folder-list-m" class="folder-scroll">
+                    <!-- Dinâmico -->
                 </div>
             </section>
 
@@ -1061,7 +1160,9 @@
             filtersM: document.getElementById('m-filter-scroll'),
             filtersPC: document.getElementById('pc-members-nav'),
             gridPC: document.getElementById('cal-grid-pc'),
-            gridM: document.getElementById('cal-grid-m')
+            gridM: document.getElementById('cal-grid-m'),
+            folderListM: document.getElementById('folder-list-m'),
+            folderListPC: document.getElementById('folder-list-pc')
         };
 
         function refreshUI() {
@@ -1093,11 +1194,49 @@
             ui.pendingVal.forEach(el => el.innerText = formatBRL(pendingTotal));
             ui.paidVal.forEach(el => el.innerText = formatBRL(paidTotal));
 
+            renderFolderTotals(monthBills);
             renderFilters();
             renderDynamicLists(monthBills);
             renderCalendar('pc');
             renderCalendar('modal');
             syncSettingsLists();
+        }
+
+        function renderFolderTotals(monthBills) {
+            const unpaid = monthBills.filter(b => !b.paid);
+            const totals = {};
+            state.members.forEach(m => totals[m] = 0);
+            unpaid.forEach(b => {
+                if (totals[b.member] !== undefined) totals[b.member] += parseFloat(b.value);
+            });
+
+            // Mobile Render
+            if (ui.folderListM) {
+                ui.folderListM.innerHTML = '';
+                state.members.forEach(m => {
+                    const card = document.createElement('div');
+                    card.className = 'folder-card';
+                    card.innerHTML = `
+                        <div class="folder-name">${m}</div>
+                        <div class="folder-val">${formatBRL(totals[m])}</div>
+                    `;
+                    ui.folderListM.appendChild(card);
+                });
+            }
+
+            // PC Render
+            if (ui.folderListPC) {
+                ui.folderListPC.innerHTML = '';
+                state.members.forEach(m => {
+                    const item = document.createElement('div');
+                    item.className = 'pc-folder-item';
+                    item.innerHTML = `
+                        <span>${m}</span>
+                        <span>${formatBRL(totals[m])}</span>
+                    `;
+                    ui.folderListPC.appendChild(item);
+                });
+            }
         }
 
         function renderFilters() {
