@@ -232,7 +232,8 @@ function saveSettings() {
 function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
 function toggleTheme() {
     const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', t); localStorage.setItem('theme', t);
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('theme', t);
 }
 function exportData() {
     const b = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
@@ -248,4 +249,4 @@ function handleImport(e) {
 
 window.onclick = (e) => { if (e.target.classList.contains('modal')) closeModals(); };
 window.onresize = render;
-document.addEventListener('DOMContentLoaded', load);
+window.onload = load;
